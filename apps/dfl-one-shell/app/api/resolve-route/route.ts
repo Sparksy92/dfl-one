@@ -4,6 +4,19 @@ import { ServerProductRegistryService } from '../../../server/product-registry-s
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+
+    // Security Rule S-01: Prohibit browser endpoint overrides
+    if (body.endpointOverride || body.manifestUrl) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: 'SSRF_BLOCKED',
+          message: 'Security Boundary Violation: Client-supplied manifest URL overrides are strictly prohibited.'
+        },
+        { status: 400 }
+      );
+    }
+
     const productId = body.productId;
     const routeKey = body.routeKey;
     const crmEnabled = body.crm_enabled !== undefined ? body.crm_enabled : true;
