@@ -5,6 +5,7 @@ import { EntitlementFilter } from './entitlement-filter.js';
 import {
   UnknownProductError,
   DisabledProductError,
+  UnsupportedManifestVersionError,
   ProductVersionMismatchError,
   UnapprovedOriginError,
   UntrustedRouteError
@@ -25,6 +26,9 @@ export class ProductRegistry {
   public registerProductRecord(record: ProductRecord): void {
     if (!record.product_id) {
       throw new Error('ProductRecord must have a valid product_id');
+    }
+    if (record.manifest_version !== '1.0.0') {
+      throw new UnsupportedManifestVersionError(record.manifest_version);
     }
     this.records.set(record.product_id, { ...record });
   }
@@ -60,7 +64,12 @@ export class ProductRegistry {
       throw new DisabledProductError(validManifest.product_id);
     }
 
-    // 4. Check product version matching
+    // 4. Check ProductRecord manifest_version
+    if (record.manifest_version !== '1.0.0') {
+      throw new UnsupportedManifestVersionError(record.manifest_version);
+    }
+
+    // 5. Check product version matching
     if (validManifest.version !== record.expected_product_version) {
       throw new ProductVersionMismatchError(
         validManifest.product_id,
@@ -69,7 +78,7 @@ export class ProductRegistry {
       );
     }
 
-    // 5. Validate routes and standalone origins against ProductRecord allowed_origins & trusted_route_keys
+    // 6. Validate routes and standalone origins against ProductRecord allowed_origins & trusted_route_keys
     for (const route of validManifest.routes) {
       if (!record.trusted_route_keys.includes(route.route_key)) {
         throw new UntrustedRouteError(validManifest.product_id, route.route_key);

@@ -23,6 +23,52 @@ describe('ManifestValidator', () => {
     assert.equal(result.version, '0.2.0');
   });
 
+  it('validates populated notification_providers and dashboard_widgets schema contract', () => {
+    const manifestWithProvidersAndWidgets = {
+      ...crmManifest,
+      notification_providers: [
+        { provider_name: 'email', event_types: ['crm.person.created', 'crm.person.updated'] }
+      ],
+      dashboard_widgets: [
+        { widget_id: 'widget-pipeline', title: 'Deal Pipeline Summary', widget_type: 'kanban_summary' }
+      ]
+    };
+
+    const validated = validator.validate(manifestWithProvidersAndWidgets);
+    assert.equal(validated.notification_providers.length, 1);
+    assert.equal(validated.notification_providers[0].provider_name, 'email');
+    assert.equal(validated.notification_providers[0].event_types[0], 'crm.person.created');
+    assert.equal(validated.dashboard_widgets.length, 1);
+    assert.equal(validated.dashboard_widgets[0].widget_id, 'widget-pipeline');
+    assert.equal(validated.dashboard_widgets[0].widget_type, 'kanban_summary');
+  });
+
+  it('rejects malformed notification_providers (missing event_types)', () => {
+    const invalid = {
+      ...crmManifest,
+      notification_providers: [
+        { provider_name: 'email' } // missing event_types
+      ]
+    };
+    assert.throws(
+      () => validator.validate(invalid),
+      ManifestValidationError
+    );
+  });
+
+  it('rejects malformed dashboard_widgets (missing widget_type)', () => {
+    const invalid = {
+      ...crmManifest,
+      dashboard_widgets: [
+        { widget_id: 'w-1', title: 'Title' } // missing widget_type
+      ]
+    };
+    assert.throws(
+      () => validator.validate(invalid),
+      ManifestValidationError
+    );
+  });
+
   it('rejects malformed manifest objects', () => {
     assert.throws(
       () => validator.validate(null),

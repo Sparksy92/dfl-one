@@ -21,6 +21,7 @@ export interface DFLNavItem {
   icon: string;
   target_route: string;
   order: number;
+  required_permission?: string;
 }
 
 export interface DFLObjectSpec {
@@ -50,8 +51,8 @@ export interface DFLSearchProviderSpec {
 }
 
 export interface DFLNotificationSpec {
-  notification_type: string;
-  description: string;
+  provider_name: string;
+  event_types: string[];
 }
 
 export interface DFLJarvisToolSpec {
@@ -64,7 +65,7 @@ export interface DFLJarvisToolSpec {
 export interface DFLWidgetSpec {
   widget_id: string;
   title: string;
-  description: string;
+  widget_type: string;
 }
 
 export interface DFLPermissionSpec {
