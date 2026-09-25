@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dfl.internal/schemas/dfl-product-manifest.v1.json",
+  "title": "DFLProductManifest",
+  "description": "JSON Schema specification for DFL Product Manifest v1.0. Declares non-sensitive product capabilities, trusted route keys, commands, events, search providers, and AI tools for DFL-One composition.",
+  "type": "object",
+  "required": [
+    "manifest_version",
+    "product_id",
+    "product_name",
+    "version",
+    "description",
+    "routes",
+    "navigation_items",
+    "capabilities",
+    "objects",
+    "commands",
+    "events",
+    "search_providers",
+    "notification_providers",
+    "ai_tools",
+    "dashboard_widgets",
+    "permissions",
+    "entitlement_requirements",
+    "health_endpoint"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "manifest_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Manifest format version."
+    },
+    "product_id": {
+      "type": "string",
+      "pattern": "^dfl-[a-z0-9-]+$",
+      "description": "Unique identifier for the DFL product (e.g. dfl-crm, dfl-commerce)."
+    },
+    "product_name": {
+      "type": "string",
+      "description": "Human-readable display name of the product."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "SemVer release version of the product."
+    },
+    "description": {
+      "type": "string",
+      "description": "Summary description of the product."
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["route_key", "path"],
+        "additionalProperties": false,
+        "properties": {
+          "route_key": {
+            "type": "string",
+            "pattern": "^[a-z0-9_.-]+$",
+            "description": "Trusted route key resolved via DFL Product Registry."
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^/[a-zA-Z0-9_./*-]*$",
+            "description": "Relative URL path pattern for the route."
+          },
+          "standalone_url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://[a-zA-Z0-9_.-]+(:[0-9]+)?(/.*)?$",
+            "description": "Optional registered standalone origin URL (must use HTTPS protocol)."
+          }
+        }
+      }
+    },
+    "navigation_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "icon", "target_route", "order"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "icon": { "type": "string" },
+          "target_route": { "type": "string" },
+          "order": { "type": "integer" },
+          "required_permission": { "type": "string" }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "objects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entity_type", "display_name", "canonical_id_pattern", "searchable"],
+        "additionalProperties": false,
+        "properties": {
+          "entity_type": { "type": "string", "pattern": "^[a-z0-9_-]+:[a-z0-9_-]+$" },
+          "display_name": { "type": "string" },
+          "canonical_id_pattern": { "type": "string" },
+          "searchable": { "type": "boolean" }
+        }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["command_name", "endpoint", "schema_url", "requires_tribe_lease"],
+        "additionalProperties": false,
+        "properties": {
+          "command_name": { "type": "string", "pattern": "^[a-z0-9_.-]+$" },
+          "endpoint": { "type": "string", "pattern": "^/[a-zA-Z0-9_./-]*$" },
+          "schema_url": { "type": "string", "pattern": "^/[a-zA-Z0-9_./-]*$" },
+          "requires_tribe_lease": { "type": "boolean" }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["event_type", "description", "schema_version"],
+        "additionalProperties": false,
+        "properties": {
+          "event_type": { "type": "string", "pattern": "^[a-z0-9_.-]+$" },
+          "description": { "type": "string" },
+          "schema_version": { "type": "string" }
+        }
+      }
+    },
+    "search_providers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entity_type", "projection_index", "fields"],
+        "additionalProperties": false,
+        "properties": {
+          "entity_type": { "type": "string" },
+          "projection_index": { "type": "string" },
+          "fields": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "notification_providers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["provider_name", "event_types"],
+        "additionalProperties": false,
+        "properties": {
+          "provider_name": { "type": "string" },
+          "event_types": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "ai_tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tool_name", "description", "parameters_schema", "read_only"],
+        "additionalProperties": false,
+        "properties": {
+          "tool_name": { "type": "string", "pattern": "^[a-z0-9_.-]+$" },
+          "description": { "type": "string" },
+          "parameters_schema": { "type": "object" },
+          "read_only": { "type": "boolean" }
+        }
+      }
+    },
+    "dashboard_widgets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["widget_id", "title", "widget_type"],
+        "additionalProperties": false,
+        "properties": {
+          "widget_id": { "type": "string" },
+          "title": { "type": "string" },
+          "widget_type": { "type": "string" }
+        }
+      }
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "key": { "type": "string", "pattern": "^[a-z0-9_.-]+$" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "entitlement_requirements": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "health_endpoint": {
+      "type": "string",
+      "pattern": "^/[a-zA-Z0-9_./-]*$",
+      "description": "Product-relative health check endpoint path."
+    }
+  }
+}

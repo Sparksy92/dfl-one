@@ -1,0 +1,8 @@
+{
+  "source_repository": "platform-definition",
+  "source_path": "schemas/dfl-product-manifest.v1.json",
+  "source_commit_sha": "c7b239d0f4afa0b7e95c53f03e83bc7dd0bb9e7f",
+  "manifest_version": "1.0.0",
+  "snapshot_sha256": "924a952ea99d738235ee74c43f4e196ba7d107fa79add558cbb688996799239a",
+  "generated_at": "2026-09-25T03:35:43-04:00"
+}

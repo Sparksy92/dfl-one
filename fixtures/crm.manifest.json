@@ -1,0 +1,66 @@
+{
+  "manifest_version": "1.0.0",
+  "product_id": "dfl-crm",
+  "product_name": "DFL CRM",
+  "version": "1.0.0",
+  "description": "DFL Customer Relationship Management System-of-Record",
+  "routes": [
+    {"route_key": "crm.home", "path": "/crm/*", "standalone_url": "https://crm.local:8000"},
+    {"route_key": "crm.contacts", "path": "/crm/contacts/*"},
+    {"route_key": "crm.organizations", "path": "/crm/organizations/*"},
+    {"route_key": "crm.opportunities", "path": "/crm/opportunities/*"}
+  ],
+  "navigation_items": [
+    {"id": "nav-contacts", "label": "Contacts & People", "icon": "user", "target_route": "crm.contacts", "order": 10},
+    {"id": "nav-orgs", "label": "Organizations", "icon": "building", "target_route": "crm.organizations", "order": 20},
+    {"id": "nav-deals", "label": "Pipeline & Deals", "icon": "dollar-sign", "target_route": "crm.opportunities", "order": 30}
+  ],
+  "capabilities": [
+    "people", "organizations", "accounts", "contacts",
+    "relationship-graph", "leads", "opportunities", "pipelines",
+    "activities", "tasks", "notes", "communication-timeline"
+  ],
+  "objects": [
+    {"entity_type": "crm:person", "display_name": "Person", "canonical_id_pattern": "crm:P-{uuid}", "searchable": true},
+    {"entity_type": "crm:organization", "display_name": "Organization", "canonical_id_pattern": "crm:O-{uuid}", "searchable": true},
+    {"entity_type": "crm:opportunity", "display_name": "Opportunity Deal", "canonical_id_pattern": "crm:D-{uuid}", "searchable": true}
+  ],
+  "commands": [
+    {"command_name": "crm.create_person", "endpoint": "/api/v1/people", "schema_url": "/openapi.json", "requires_tribe_lease": true},
+    {"command_name": "crm.update_opportunity", "endpoint": "/api/v1/opportunities", "schema_url": "/openapi.json", "requires_tribe_lease": true}
+  ],
+  "events": [
+    {"event_type": "crm.person.created", "description": "Fired when a new person record is committed", "schema_version": "1.0.0"},
+    {"event_type": "crm.person.updated", "description": "Fired when a person record is updated", "schema_version": "1.0.0"},
+    {"event_type": "crm.opportunity.stage_changed", "description": "Fired when deal pipeline stage transitions", "schema_version": "1.0.0"}
+  ],
+  "search_providers": [
+    {"entity_type": "crm:person", "projection_index": "crm_persons", "fields": ["first_name", "last_name", "email", "phone"]},
+    {"entity_type": "crm:organization", "projection_index": "crm_organizations", "fields": ["name", "domain", "industry"]}
+  ],
+  "notification_providers": [],
+  "ai_tools": [
+    {
+      "tool_name": "crm.get_customer_timeline",
+      "description": "Retrieve activity timeline for a CRM customer entity",
+      "parameters_schema": {
+        "type": "object",
+        "properties": {
+          "entity_type": {"type": "string"},
+          "entity_id": {"type": "string"}
+        },
+        "required": ["entity_type", "entity_id"]
+      },
+      "read_only": true
+    }
+  ],
+  "dashboard_widgets": [],
+  "permissions": [
+    {"key": "crm.contacts.read", "description": "Read contact and person records"},
+    {"key": "crm.contacts.write", "description": "Create and update contact records"},
+    {"key": "crm.deals.read", "description": "Read opportunity deals"},
+    {"key": "crm.deals.write", "description": "Modify deal stage and amount"}
+  ],
+  "entitlement_requirements": ["crm.base"],
+  "health_endpoint": "/api/v1/health"
+}

@@ -1,0 +1,43 @@
+{
+  "manifest_version": "1.0.0",
+  "product_id": "dfl-commerce",
+  "product_name": "DFL Commerce",
+  "version": "0.2.0",
+  "description": "DFL Autonomous E-Commerce System-of-Record (Catalog, Inventory, Orders, Customers)",
+  "routes": [
+    {"route_key": "commerce.home", "path": "/commerce/*", "standalone_url": "https://commerce.local:3100"},
+    {"route_key": "commerce.products", "path": "/commerce/products/*"},
+    {"route_key": "commerce.orders", "path": "/commerce/orders/*"},
+    {"route_key": "commerce.customers", "path": "/commerce/customers/*"}
+  ],
+  "navigation_items": [
+    {"id": "nav-store", "label": "Commerce Overview", "icon": "shopping-bag", "target_route": "commerce.home", "order": 10},
+    {"id": "nav-products", "label": "Products & Catalog", "icon": "tag", "target_route": "commerce.products", "order": 20},
+    {"id": "nav-orders", "label": "Orders & Fulfillments", "icon": "package", "target_route": "commerce.orders", "order": 30},
+    {"id": "nav-customers", "label": "Commerce Customers", "icon": "users", "target_route": "commerce.customers", "order": 40}
+  ],
+  "capabilities": ["catalog", "inventory", "orders", "checkout", "customers", "fulfillments", "returns", "promotions"],
+  "objects": [
+    {"entity_type": "commerce:product", "display_name": "Product", "canonical_id_pattern": "commerce:PRD-{uuid}", "searchable": true},
+    {"entity_type": "commerce:order", "display_name": "Customer Order", "canonical_id_pattern": "commerce:ORD-{uuid}", "searchable": true},
+    {"entity_type": "commerce:customer", "display_name": "Store Customer", "canonical_id_pattern": "commerce:CUST-{uuid}", "searchable": true}
+  ],
+  "commands": [
+    {"command_name": "commerce.create_product", "endpoint": "/api/v1/admin/products", "schema_url": "/openapi.json", "requires_tribe_lease": true}
+  ],
+  "events": [
+    {"event_type": "commerce.order.created", "description": "Fired when customer checkout completes", "schema_version": "1.0.0"}
+  ],
+  "search_providers": [
+    {"entity_type": "commerce:product", "projection_index": "commerce_products", "fields": ["title", "description", "sku"]}
+  ],
+  "notification_providers": [],
+  "ai_tools": [],
+  "dashboard_widgets": [],
+  "permissions": [
+    {"key": "commerce.catalog.read", "description": "Read products and categories"},
+    {"key": "commerce.orders.manage", "description": "Update order status and fulfillments"}
+  ],
+  "entitlement_requirements": ["commerce.base"],
+  "health_endpoint": "/api/v1/health"
+}
