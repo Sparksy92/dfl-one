@@ -5,7 +5,10 @@
     "packages/*"
   ],
   "scripts": {
-    "test": "npm run test --workspace=packages/product-registry",
-    "build": "npm run build --workspace=packages/product-registry"
+    "test": "npm run test:registry && npm run test:native && npm run test:augmented",
+    "test:registry": "npm run test --workspace=packages/product-registry",
+    "test:native": "npm run test --workspace=packages/shell-native",
+    "test:augmented": "npm run test --workspace=packages/shell-augmented",
+    "build": "npm run build --workspaces"
   }
 }

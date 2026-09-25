@@ -1,0 +1,19 @@
+{
+  "name": "@dfl-one/shell-native",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --import tsx --test tests/**/*.test.ts"
+  },
+  "dependencies": {
+    "@dfl-one/product-registry": "*",
+    "lucide-react": "^0.469.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
