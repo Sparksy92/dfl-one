@@ -12,6 +12,6 @@
     "test:b1": "npm run test --workspace=packages/shell-b1-refine",
     "test:b2": "npm run test --workspace=packages/shell-b2-twenty",
     "test:contract": "npm run test --workspace=packages/shared-test-suite",
-    "build": "npm run build --workspaces"
+    "build": "npm run build --workspace=packages/product-registry && npm run build --workspace=packages/shell-native && npm run build --workspace=packages/shell-b1-refine && npm run build --workspace=packages/shell-b2-twenty && npm run build --workspace=packages/shell-augmented && npm run build --workspace=packages/shared-test-suite && npm run build --workspace=apps/dfl-one-shell"
   }
 }

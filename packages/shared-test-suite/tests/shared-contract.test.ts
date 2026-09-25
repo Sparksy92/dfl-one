@@ -1,10 +1,12 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
+import { execSync } from 'node:child_process';
 import { ProductRegistry, ProductRecord, UntrustedRouteError, DisabledProductError } from '@dfl-one/product-registry';
 import { DflNativeShell } from '@dfl-one/shell-native';
 import { DflB1RefineShell } from '@dfl-one/shell-b1-refine';
 import { DflB2TwentyShell } from '@dfl-one/shell-b2-twenty';
+import { ServerProductRegistryService } from '../../../apps/dfl-one-shell/server/product-registry-service.js';
 
 const require = createRequire(import.meta.url);
 const crmManifest = require('../../../fixtures/crm.manifest.json');
@@ -64,7 +66,7 @@ const candidates: GenericShellAdapter[] = [
           });
           return {
             sectionCount: state.sections.length,
-            productIds: state.sections.map((s) => s.product_id),
+            productIds: state.sections.map((s: any) => s.product_id),
             itemsCount: state.total_items
           };
         },
@@ -81,7 +83,7 @@ const candidates: GenericShellAdapter[] = [
             active_entitlements: session.active_entitlements,
             audience: 'staff'
           });
-          return state.sections.flatMap((s) => s.items.map((i) => i.target_route));
+          return state.sections.flatMap((s: any) => s.items.map((i: any) => i.target_route));
         }
       };
     }
@@ -95,10 +97,10 @@ const candidates: GenericShellAdapter[] = [
         registerManifest: (m) => shell.registerManifest(m),
         generateNav: (session) => {
           const state = shell.getNavigationState(session);
-          const totalItems = state.visibleNavs.reduce((acc, v) => acc + v.items.length, 0);
+          const totalItems = state.visibleNavs.reduce((acc: number, v: any) => acc + v.items.length, 0);
           return {
             sectionCount: state.visibleNavs.length,
-            productIds: state.visibleNavs.map((s) => s.product_id),
+            productIds: state.visibleNavs.map((s: any) => s.product_id),
             itemsCount: totalItems
           };
         },
@@ -108,7 +110,7 @@ const candidates: GenericShellAdapter[] = [
         toggleMobileNav: (open) => { mobileOpen = open; return { isMobileNavOpen: mobileOpen }; },
         getKeyboardNavItems: (session) => {
           const state = shell.getNavigationState(session);
-          return state.visibleNavs.flatMap((s) => s.items.map((i) => i.target_route));
+          return state.visibleNavs.flatMap((s: any) => s.items.map((i: any) => i.target_route));
         }
       };
     }
@@ -122,10 +124,10 @@ const candidates: GenericShellAdapter[] = [
         registerManifest: (m) => shell.registerManifest(m),
         generateNav: (session) => {
           const state = shell.getNavigationState(session);
-          const totalItems = state.visibleNavs.reduce((acc, v) => acc + v.items.length, 0);
+          const totalItems = state.visibleNavs.reduce((acc: number, v: any) => acc + v.items.length, 0);
           return {
             sectionCount: state.visibleNavs.length,
-            productIds: state.visibleNavs.map((s) => s.product_id),
+            productIds: state.visibleNavs.map((s: any) => s.product_id),
             itemsCount: totalItems
           };
         },
@@ -135,7 +137,7 @@ const candidates: GenericShellAdapter[] = [
         toggleMobileNav: (open) => { mobileOpen = open; return { isMobileNavOpen: mobileOpen }; },
         getKeyboardNavItems: (session) => {
           const state = shell.getNavigationState(session);
-          return state.visibleNavs.flatMap((s) => s.items.map((i) => i.target_route));
+          return state.visibleNavs.flatMap((s: any) => s.items.map((i: any) => i.target_route));
         }
       };
     }
@@ -291,5 +293,69 @@ candidates.forEach((cand) => {
       assert.ok(keys.includes('crm.contacts'));
       assert.ok(keys.includes('commerce.products'));
     });
+  });
+});
+
+describe('Architectural Assertions (8/8) — Server Authority & Trust Boundary', () => {
+  it('A-01 browser does not instantiate ProductRegistry', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const pagePath = path.resolve(import.meta.dirname, '../../../apps/dfl-one-shell/app/page.tsx');
+    const pageContent = fs.readFileSync(pagePath, 'utf8');
+    assert.equal(pageContent.includes('new ProductRegistry'), false, 'Browser Client Component MUST NOT instantiate ProductRegistry');
+  });
+
+  it('A-02 browser does not validate product manifests', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const pagePath = path.resolve(import.meta.dirname, '../../../apps/dfl-one-shell/app/page.tsx');
+    const pageContent = fs.readFileSync(pagePath, 'utf8');
+    assert.equal(pageContent.includes('validateManifest'), false, 'Browser Client Component MUST NOT perform manifest validation');
+  });
+
+  it('A-03 browser does not own allowed-origin trust decisions', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const pagePath = path.resolve(import.meta.dirname, '../../../apps/dfl-one-shell/app/page.tsx');
+    const pageContent = fs.readFileSync(pagePath, 'utf8');
+    assert.equal(pageContent.includes('allowed_origins'), false, 'Browser Client Component MUST NOT define allowed-origin trust lists');
+  });
+
+  it('A-04 browser does not own expected-version trust decisions', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const pagePath = path.resolve(import.meta.dirname, '../../../apps/dfl-one-shell/app/page.tsx');
+    const pageContent = fs.readFileSync(pagePath, 'utf8');
+    assert.equal(pageContent.includes('expected_product_version'), false, 'Browser Client Component MUST NOT define version trust rules');
+  });
+
+  it('A-05 route trust resolution occurs server-side via ServerProductRegistryService', () => {
+    const serverService = ServerProductRegistryService.getInstance();
+    const res = serverService.resolveTrustedRoute('dfl-crm', 'crm.home');
+    assert.equal(res.ok, true);
+    assert.equal(res.route?.product_id, 'dfl-crm');
+    assert.equal(res.route?.trusted, true);
+  });
+
+  it('A-06 entitlement composition decision occurs server-side via ServerProductRegistryService', () => {
+    const serverService = ServerProductRegistryService.getInstance();
+    const projections = serverService.getCompositionProjections(['crm.base', 'commerce.base']);
+    assert.equal(projections.length, 2);
+    assert.equal(projections[0].product_id, 'dfl-crm');
+    assert.equal(projections[1].product_id, 'dfl-commerce');
+  });
+
+  it('A-07 certified Product Registry package source is completely unchanged', () => {
+    const path = require('path');
+    const monorepoRoot = path.resolve(import.meta.dirname, '../../..');
+    const diff = execSync('git diff c50894c68e42ff736debff141ccd0be5d7e67b56 -- packages/product-registry', { cwd: monorepoRoot }).toString();
+    assert.equal(diff.trim(), '', 'Certified ProductRegistry package source MUST NOT be modified');
+  });
+
+  it('A-08 no .next build output tracked by Git', () => {
+    const path = require('path');
+    const monorepoRoot = path.resolve(import.meta.dirname, '../../..');
+    const trackedNext = execSync('git ls-files | grep "/.next/" || true', { cwd: monorepoRoot }).toString();
+    assert.equal(trackedNext.trim(), '', 'No .next build artifacts may be tracked in Git');
   });
 });
