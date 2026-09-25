@@ -12,8 +12,8 @@ export class RefineProductRegistryAdapter {
     for (const manifest of manifests) {
       for (const item of manifest.navigation_items) {
         resources.push({
-          name: `${manifest.product_id}.${item.key}`,
-          list: item.path,
+          name: `${manifest.product_id}.${item.target_route}`,
+          list: item.target_route,
           meta: {
             product_id: manifest.product_id,
             entitlement: manifest.entitlement_requirements[0] || `${manifest.product_id}.base`

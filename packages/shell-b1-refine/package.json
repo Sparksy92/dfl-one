@@ -1,5 +1,5 @@
 {
-  "name": "@dfl-one/shell-native",
+  "name": "@dfl-one/shell-b1-refine",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@dfl-one/product-registry": "*",
-    "lucide-react": "^0.469.0"
+    "@refinedev/core": "^5.0.12"
   },
   "devDependencies": {
     "@types/node": "^20.17.0",

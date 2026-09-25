@@ -1,17 +1,17 @@
 {
-  "name": "@dfl-one/shell-native",
+  "name": "@dfl-one/shared-test-suite",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "main": "./src/index.ts",
-  "exports": "./src/index.ts",
   "scripts": {
     "build": "tsc",
     "test": "node --import tsx --test tests/**/*.test.ts"
   },
   "dependencies": {
     "@dfl-one/product-registry": "*",
-    "lucide-react": "^0.469.0"
+    "@dfl-one/shell-native": "*",
+    "@dfl-one/shell-b1-refine": "*",
+    "@dfl-one/shell-b2-twenty": "*"
   },
   "devDependencies": {
     "@types/node": "^20.17.0",

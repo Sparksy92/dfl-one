@@ -2,13 +2,16 @@
   "name": "dfl-one-monorepo",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
-    "test": "npm run test:registry && npm run test:native && npm run test:augmented",
+    "test": "npm run test:registry && npm run test:native && npm run test:b1 && npm run test:b2 && npm run test:contract",
     "test:registry": "npm run test --workspace=packages/product-registry",
     "test:native": "npm run test --workspace=packages/shell-native",
-    "test:augmented": "npm run test --workspace=packages/shell-augmented",
+    "test:b1": "npm run test --workspace=packages/shell-b1-refine",
+    "test:b2": "npm run test --workspace=packages/shell-b2-twenty",
+    "test:contract": "npm run test --workspace=packages/shared-test-suite",
     "build": "npm run build --workspaces"
   }
 }

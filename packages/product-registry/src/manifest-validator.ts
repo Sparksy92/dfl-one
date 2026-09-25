@@ -1,11 +1,8 @@
 import Ajv2020Import from 'ajv/dist/2020.js';
 import addFormatsImport from 'ajv-formats';
-import { createRequire } from 'module';
+import schema from '../../../contracts/generated/dfl-product-manifest.v1.json' with { type: 'json' };
 import { DFLProductManifest } from './types.js';
 import { ManifestValidationError, UnsupportedManifestVersionError } from './errors.js';
-
-const require = createRequire(import.meta.url);
-const schema = require('../../../contracts/generated/dfl-product-manifest.v1.json');
 
 const Ajv2020 = (Ajv2020Import as any).default || Ajv2020Import;
 const addFormats = (addFormatsImport as any).default || addFormatsImport;

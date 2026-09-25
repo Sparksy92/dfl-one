@@ -1,3 +1,3 @@
 export * from './types.js';
 export * from './harvested-components.js';
-export * from './dfl-native-shell.ts';
+export * from './dfl-native-shell.js';
