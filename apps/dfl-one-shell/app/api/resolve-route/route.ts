@@ -17,10 +17,20 @@ export async function POST(request: Request) {
       );
     }
 
+    // Security Rule S-09: Prohibit client enabling/disabling products
+    if (body.crm_enabled !== undefined || body.commerce_enabled !== undefined) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: 'AUTHORITY_VIOLATION',
+          message: 'Security Boundary Violation: Client-supplied product enable/disable toggles are strictly prohibited.'
+        },
+        { status: 400 }
+      );
+    }
+
     const productId = body.productId;
     const routeKey = body.routeKey;
-    const crmEnabled = body.crm_enabled !== undefined ? body.crm_enabled : true;
-    const commerceEnabled = body.commerce_enabled !== undefined ? body.commerce_enabled : true;
 
     if (!productId || !routeKey) {
       return NextResponse.json(
@@ -30,9 +40,6 @@ export async function POST(request: Request) {
     }
 
     const serverRegistry = ServerProductRegistryService.getInstance();
-    serverRegistry.setProductEnabled('dfl-crm', crmEnabled);
-    serverRegistry.setProductEnabled('dfl-commerce', commerceEnabled);
-
     const result = serverRegistry.resolveTrustedRoute(productId, routeKey);
     return NextResponse.json(result);
   } catch (err: any) {

@@ -12,7 +12,8 @@ export type ManifestFetchStatus =
   | 'unreachable'
   | 'invalid_manifest'
   | 'version_mismatch'
-  | 'ssrf_blocked';
+  | 'ssrf_blocked'
+  | 'undiscovered';
 
 export interface LiveManifestResult {
   product_id: string;
@@ -90,17 +91,21 @@ export class LiveManifestFetcher {
       }
 
       const origin = parsed.origin;
-      let isAllowed = this.allowedOrigins.has(origin);
+      let isAllowed = false;
 
       if (expectedProductId) {
         const config = this.deploymentConfigs.get(expectedProductId);
         if (config && config.allowed_origins.length > 0) {
-          isAllowed = config.allowed_origins.includes(origin) || this.allowedOrigins.has(origin);
+          isAllowed = config.allowed_origins.includes(origin);
+        } else {
+          isAllowed = false;
         }
+      } else {
+        isAllowed = this.allowedOrigins.has(origin);
       }
 
       if (!isAllowed) {
-        return { safe: false, reason: `Origin '${origin}' is not in server allowed origins list` };
+        return { safe: false, reason: `Origin '${origin}' is not authorized for product '${expectedProductId || 'unknown'}'` };
       }
 
       return { safe: true };

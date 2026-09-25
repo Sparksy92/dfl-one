@@ -331,6 +331,7 @@ describe('Architectural Assertions (8/8) — Server Authority & Trust Boundary',
 
   it('A-05 route trust resolution occurs server-side via ServerProductRegistryService', () => {
     const serverService = ServerProductRegistryService.getInstance();
+    serverService.loadFixtures();
     const res = serverService.resolveTrustedRoute('dfl-crm', 'crm.home');
     assert.equal(res.ok, true);
     assert.equal(res.route?.product_id, 'dfl-crm');
@@ -339,6 +340,7 @@ describe('Architectural Assertions (8/8) — Server Authority & Trust Boundary',
 
   it('A-06 entitlement composition decision occurs server-side via ServerProductRegistryService', () => {
     const serverService = ServerProductRegistryService.getInstance();
+    serverService.loadFixtures();
     const projections = serverService.getCompositionProjections(['crm.base', 'commerce.base']);
     assert.equal(projections.length, 2);
     assert.equal(projections[0].product_id, 'dfl-crm');

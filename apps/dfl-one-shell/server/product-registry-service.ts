@@ -83,6 +83,11 @@ export class ServerProductRegistryService {
     this.registry.registerProductRecord(this.crmRecord);
     this.registry.registerProductRecord(this.commerceRecord);
 
+    this.healthStatuses.set('dfl-crm', 'undiscovered');
+    this.healthStatuses.set('dfl-commerce', 'undiscovered');
+  }
+
+  public loadFixtures() {
     const crmManifest = this.registry.validateManifest(crmManifestJson as unknown as DFLProductManifest);
     const commerceManifest = this.registry.validateManifest(commerceManifestJson as unknown as DFLProductManifest);
 
