@@ -143,7 +143,7 @@ def test_bl_auto_001_notification_security_and_rbac():
 
 
 def test_bl_perf_001_analytics_projection_freshness_benchmark():
-    """Validates BL-PERF-001 benchmark execution across 30s, 20s, 15s, and 10s candidate intervals."""
+    """Validates BL-PERF-001 benchmark execution across 30s, 20s, 15s, and 10s candidate intervals measuring end-to-end projection age."""
     engine = AnalyticsFreshnessBenchmarkEngine()
     
     res = engine.run_candidate_interval_benchmark([30.0, 20.0, 15.0, 10.0])
@@ -151,23 +151,28 @@ def test_bl_perf_001_analytics_projection_freshness_benchmark():
     assert res["status"] == "BENCHMARK_COMPLETE"
     assert res["selected_safe_interval_seconds"] in [10.0, 15.0, 20.0, 30.0]
     
-    # Verify invariants for selected safe interval
+    # Verify invariants and end-to-end projection age for selected safe interval
     selected_intv = res["selected_safe_interval_seconds"]
     metrics = res["benchmark_results"][selected_intv]
     
+    assert metrics["end_to_end_projection_age_p50_sec"] < 15.0
+    assert metrics["sample_count"] == 5000
     assert metrics["financial_reconciliation_variance"] == 0.0
     assert metrics["duplicate_analytical_facts"] == 0
     assert metrics["source_system_impact_acceptable"] is True
+    assert metrics["freshness_improvement_demonstrated"] is True
 
 
-def test_bl_perf_001_graceful_outage_degradation():
-    """Validates that Analytics degrades gracefully during outages without affecting source domain operations."""
+def test_bl_perf_001_outage_recovery_and_catchup():
+    """Validates Analytics outage recovery and deterministic backlog catch-up."""
     engine = AnalyticsFreshnessBenchmarkEngine()
 
-    outage_res = engine.simulate_outage_degradation("CLICKHOUSE")
-    assert outage_res["authoritative_domain_impact"] == "NONE (Source SOE Unaffected)"
-    assert outage_res["analytics_projection_status"] == "EXPLICITLY_STALE"
-    assert outage_res["degradation_handled_correctly"] is True
+    catchup_res = engine.test_outage_recovery_catchup(outage_duration_seconds=60.0)
+    assert catchup_res["catch_up_successful"] is True
+    assert catchup_res["financial_reconciliation_variance"] == 0.0
+    assert catchup_res["duplicate_analytical_facts"] == 0
+    assert catchup_res["missing_committed_facts"] == 0
+    assert catchup_res["false_current_dashboard_state"] is False
 
 
 def test_v110_combined_operational_journey():
