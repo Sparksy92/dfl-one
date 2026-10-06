@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server';
 import { ServerProductRegistryService } from '../../../../server/product-registry-service';
 
 export async function POST(request: Request) {
+  if (process.env.NODE_ENV === 'production' && process.env.DFL_ENABLE_TEST_ROUTES !== 'true') {
+    return NextResponse.json(
+      { ok: false, code: 'NOT_FOUND', message: 'Not found' },
+      { status: 404 }
+    );
+  }
+
   try {
     const body = await request.json();
 
