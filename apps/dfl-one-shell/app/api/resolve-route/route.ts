@@ -41,7 +41,10 @@ export async function POST(request: Request) {
 
     const serverRegistry = ServerProductRegistryService.getInstance();
     const entitlementProvider = serverRegistry.getEntitlementProvider();
-    const entitlements = await entitlementProvider.getEntitlements({});
+    const entitlements = await entitlementProvider.getEntitlements({
+      authorization: request.headers.get('authorization') || undefined,
+      cookie: request.headers.get('cookie') || undefined
+    });
     const result = serverRegistry.resolveTrustedRoute(productId, routeKey, entitlements);
     return NextResponse.json(result);
   } catch (err: any) {
