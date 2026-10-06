@@ -8,7 +8,7 @@
     {
       "route_key": "commerce.home",
       "path": "/commerce/*",
-      "standalone_url": "https://commerce.local:3100"
+      "standalone_url": "https://commerce.local:3000"
     },
     {
       "route_key": "commerce.products",
