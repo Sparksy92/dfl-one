@@ -65,7 +65,7 @@ export class ServerProductRegistryService {
     product_id: 'dfl-commerce',
     manifest_version: '1.0.0',
     expected_product_version: process.env.DFL_COMMERCE_PRODUCT_VERSION || '0.1.0',
-    allowed_origins: envOrigins('DFL_COMMERCE_ALLOWED_ORIGINS', ['http://127.0.0.1:8100', 'http://localhost:8100', 'http://127.0.0.1:3000', 'http://localhost:3000']),
+    allowed_origins: envOrigins('DFL_COMMERCE_ALLOWED_ORIGINS', ['http://127.0.0.1:8100', 'http://localhost:8100', 'http://127.0.0.1:3000', 'http://localhost:3000', 'https://commerce.local:3000']),
     health_endpoint: process.env.DFL_COMMERCE_HEALTH_ENDPOINT || '/api/health',
     trusted_route_keys: ['commerce.home', 'commerce.products', 'commerce.orders', 'commerce.customers'],
     entitlement_requirements: ['commerce.base'],
