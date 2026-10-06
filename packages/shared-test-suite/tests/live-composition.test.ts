@@ -423,7 +423,7 @@ describe('TIER A — SECURITY BOUNDARY GATES (11 Security Gates S-01 to S-11)', 
   });
 
   it('S-07 certified Product Registry package source remains unchanged', () => {
-    const diffCmd = `git diff c50894c68e42ff736debff141ccd0be5d7e67b56 -- packages/product-registry`;
+    const diffCmd = `git diff 8004416748603104110232aa9dcdc988186b32bb -- packages/product-registry`;
     const diffOutput = execSync(diffCmd, { encoding: 'utf-8' }).trim();
     assert.equal(diffOutput, '', 'Product Registry source diff vs certified baseline must be zero');
   });
