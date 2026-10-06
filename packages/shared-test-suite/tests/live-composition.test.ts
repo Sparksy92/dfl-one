@@ -11,6 +11,7 @@ let crmServer: Server;
 let commerceServer: Server;
 const MOCK_CRM_PORT = 18000;
 const MOCK_COMMERCE_PORT = 13100;
+const describeLiveTier = process.env.DFL_TIER_B_LIVE === '1' ? describe : describe.skip;
 
 const validCrmManifest: DFLProductManifest = {
   manifest_version: '1.0.0',
@@ -196,7 +197,7 @@ describe('TIER A — DETERMINISTIC INTEGRATION (18 Gates)', () => {
       manifest_version: '1.0.0',
       expected_product_version: '1.0.0',
       allowed_origins: ['https://crm.local:8000', `http://127.0.0.1:${MOCK_CRM_PORT}`],
-      health_endpoint: '/api/v1/health',
+      health_endpoint: '/api/v1/readiness',
       trusted_route_keys: ['crm.home', 'crm.contacts', 'crm.organizations', 'crm.opportunities'],
       entitlement_requirements: ['crm.base'],
       enabled: true
@@ -457,7 +458,7 @@ describe('TIER A — SECURITY BOUNDARY GATES (11 Security Gates S-01 to S-11)', 
 
 });
 
-describe('TIER B — EMPIRICAL LIVE RUNTIME (Actual CRM 8000 + Commerce API 8100)', () => {
+describeLiveTier('TIER B — EMPIRICAL LIVE RUNTIME (Actual CRM 8000 + Commerce API 8100)', () => {
 
   it('Live CRM process serves valid /dfl-manifest.json on port 8000', async () => {
     const res = await fetch('http://127.0.0.1:8000/dfl-manifest.json');
@@ -512,8 +513,8 @@ describe('TIER B — EMPIRICAL LIVE RUNTIME (Actual CRM 8000 + Commerce API 8100
 
   it('Live Commerce protected API endpoint behavior verified', async () => {
     const res = await fetch('http://127.0.0.1:8100/api/admin/orders');
-    // Standalone Commerce returns 401 unauthorized or 500
-    assert.ok(res.status === 401 || res.status === 403 || res.status === 500);
+    // Production authorization must fail closed, not surface an internal error.
+    assert.ok(res.status === 401 || res.status === 403);
   });
 
   it('Actual dual live discovery populates DFL-One shell with healthy projections', async () => {
