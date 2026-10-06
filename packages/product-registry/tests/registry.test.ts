@@ -33,7 +33,7 @@ describe('ProductRegistry', () => {
     product_id: 'dfl-commerce',
     manifest_version: '1.0.0',
     expected_product_version: '0.1.0',
-    allowed_origins: ['https://commerce.local:3100'],
+    allowed_origins: ['https://commerce.local:3000'],
     health_endpoint: '/api/v1/health',
     trusted_route_keys: ['commerce.home', 'commerce.products', 'commerce.orders', 'commerce.customers'],
     entitlement_requirements: ['commerce.base'],
