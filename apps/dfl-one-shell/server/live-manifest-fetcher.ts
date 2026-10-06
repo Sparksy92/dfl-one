@@ -224,6 +224,74 @@ export class LiveManifestFetcher {
         };
       }
 
+      // A reachable manifest is not sufficient for production composition.
+      // Probe the product-declared health/readiness endpoint on the SAME trusted origin.
+      try {
+        const manifestOrigin = new URL(targetUrl).origin;
+        const healthUrl = new URL(validatedManifest.health_endpoint, manifestOrigin);
+        if (healthUrl.origin !== manifestOrigin) {
+          return {
+            product_id: productId,
+            status: 'invalid_manifest',
+            manifest: null,
+            error: 'Health endpoint must remain on the manifest origin'
+          };
+        }
+
+        const healthController = new AbortController();
+        const healthTimer = setTimeout(() => healthController.abort(), timeoutMs);
+        const healthResponse = await fetch(healthUrl.toString(), {
+          method: 'GET',
+          headers: { Accept: 'application/json' },
+          signal: healthController.signal,
+          redirect: 'error'
+        });
+        clearTimeout(healthTimer);
+
+        if (!healthResponse.ok) {
+          return {
+            product_id: productId,
+            status: 'unhealthy',
+            manifest: null,
+            error: `Health probe returned HTTP ${healthResponse.status}`
+          };
+        }
+
+        const healthText = await healthResponse.text();
+        if (healthText.length > 65536) {
+          return {
+            product_id: productId,
+            status: 'unhealthy',
+            manifest: null,
+            error: 'Health response exceeded 64 KB'
+          };
+        }
+
+        let healthBody: any = null;
+        try {
+          healthBody = healthText ? JSON.parse(healthText) : null;
+        } catch {
+          healthBody = null;
+        }
+
+        const healthStatus = String(healthBody?.status || '').toLowerCase();
+        if (['degraded', 'fail', 'failed', 'unhealthy', 'error', 'unavailable'].includes(healthStatus)) {
+          return {
+            product_id: productId,
+            status: 'unhealthy',
+            manifest: null,
+            error: `Health probe reported status '${healthStatus}'`
+          };
+        }
+      } catch (healthErr: any) {
+        return {
+          product_id: productId,
+          status: 'unhealthy',
+          manifest: null,
+          error: `Health probe failed: ${healthErr?.message || 'network error'}`
+        };
+      }
+
       return {
         product_id: productId,
         status: 'healthy',
