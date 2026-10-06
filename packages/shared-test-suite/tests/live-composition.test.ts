@@ -74,7 +74,7 @@ const validCommerceManifest: DFLProductManifest = {
   dashboard_widgets: [],
   permissions: [],
   entitlement_requirements: ['commerce.base'],
-  health_endpoint: '/api/v1/health'
+  health_endpoint: '/api/health'
 };
 
 let crmServingTampered = false;
@@ -341,7 +341,7 @@ describe('TIER A — DETERMINISTIC INTEGRATION (18 Gates)', () => {
     const crmRes = await fetch(`http://127.0.0.1:${MOCK_CRM_PORT}/api/v1/health`);
     assert.equal(crmRes.status, 200);
 
-    const commRes = await fetch(`http://127.0.0.1:${MOCK_COMMERCE_PORT}/api/v1/health`);
+    const commRes = await fetch(`http://127.0.0.1:${MOCK_COMMERCE_PORT}/api/health`);
     assert.equal(commRes.status, 200);
   });
 
@@ -457,7 +457,7 @@ describe('TIER A — SECURITY BOUNDARY GATES (11 Security Gates S-01 to S-11)', 
 
 });
 
-describe('TIER B — EMPIRICAL LIVE RUNTIME (Actual CRM 8000 + Commerce 3100 Processes)', () => {
+describe('TIER B — EMPIRICAL LIVE RUNTIME (Actual CRM 8000 + Commerce API 8100)', () => {
 
   it('Live CRM process serves valid /dfl-manifest.json on port 8000', async () => {
     const res = await fetch('http://127.0.0.1:8000/dfl-manifest.json');
@@ -484,7 +484,7 @@ describe('TIER B — EMPIRICAL LIVE RUNTIME (Actual CRM 8000 + Commerce 3100 Pro
 
   it('Live Commerce API serves valid /dfl-manifest.json on port 8100', async () => {
     const res = await fetch('http://127.0.0.1:8100/dfl-manifest.json');
-    assert.equal(res.status, 200, 'Actual Commerce process on 3100 must return 200 OK');
+    assert.equal(res.status, 200, 'Actual Commerce API on 8100 must return 200 OK');
     const manifest = await res.json() as any;
     assert.equal(manifest.product_id, 'dfl-commerce');
 
@@ -493,7 +493,7 @@ describe('TIER B — EMPIRICAL LIVE RUNTIME (Actual CRM 8000 + Commerce 3100 Pro
       product_id: 'dfl-commerce',
       manifest_version: '1.0.0',
       expected_product_version: '0.1.0',
-      allowed_origins: ['http://127.0.0.1:3100', 'http://localhost:3100', 'https://commerce.local:3000'],
+      allowed_origins: ['http://127.0.0.1:8100', 'http://localhost:8100', 'https://commerce.local:3000'],
       health_endpoint: '/api/health',
       trusted_route_keys: ['commerce.home', 'commerce.products', 'commerce.orders', 'commerce.customers'],
       entitlement_requirements: ['commerce.base'],
