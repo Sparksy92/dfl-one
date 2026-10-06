@@ -1,5 +1,19 @@
 import { DFLProductManifest, ProductRegistry } from '@dfl-one/product-registry';
 
+function csvEnv(name: string, defaults: string[]): string[] {
+  const raw = process.env[name];
+  if (!raw) return defaults;
+  return Array.from(new Set(raw.split(',').map((value) => value.trim()).filter(Boolean)));
+}
+
+function originOf(url: string): string | null {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
+}
+
 export interface ProductDeploymentConfig {
   product_id: string;
   manifest_url: string;
@@ -34,16 +48,28 @@ export class LiveManifestFetcher {
   ]);
 
   constructor(customConfigs?: ProductDeploymentConfig[]) {
+    const crmManifestUrl = process.env.DFL_CRM_MANIFEST_URL || 'http://127.0.0.1:8000/dfl-manifest.json';
+    const commerceManifestUrl = process.env.DFL_COMMERCE_MANIFEST_URL || 'http://127.0.0.1:3100/dfl-manifest.json';
+
+    const crmOrigins = csvEnv(
+      'DFL_CRM_MANIFEST_ORIGINS',
+      [originOf(crmManifestUrl), 'http://127.0.0.1:8000', 'http://localhost:8000', 'https://crm.local:8000'].filter(Boolean) as string[]
+    );
+    const commerceOrigins = csvEnv(
+      'DFL_COMMERCE_MANIFEST_ORIGINS',
+      [originOf(commerceManifestUrl), 'http://127.0.0.1:3100', 'http://localhost:3100', 'https://commerce.local:3100'].filter(Boolean) as string[]
+    );
+
     const defaults: ProductDeploymentConfig[] = [
       {
         product_id: 'dfl-crm',
-        manifest_url: 'http://127.0.0.1:8000/dfl-manifest.json',
-        allowed_origins: ['http://127.0.0.1:8000', 'http://localhost:8000', 'https://crm.local:8000']
+        manifest_url: crmManifestUrl,
+        allowed_origins: crmOrigins
       },
       {
         product_id: 'dfl-commerce',
-        manifest_url: 'http://127.0.0.1:3100/dfl-manifest.json',
-        allowed_origins: ['http://127.0.0.1:3100', 'http://localhost:3100', 'https://commerce.local:3100']
+        manifest_url: commerceManifestUrl,
+        allowed_origins: commerceOrigins
       }
     ];
 
