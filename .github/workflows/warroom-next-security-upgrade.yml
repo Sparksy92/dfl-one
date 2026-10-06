@@ -22,6 +22,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: warroom/2026-10-05-integrated-release
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
