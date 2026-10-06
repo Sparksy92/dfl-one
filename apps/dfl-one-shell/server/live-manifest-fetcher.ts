@@ -22,6 +22,11 @@ export interface LiveManifestResult {
   error?: string;
 }
 
+function parseOrigins(value: string | undefined, fallback: string[]): string[] {
+  if (!value) return fallback;
+  return value.split(',').map((origin) => origin.trim()).filter(Boolean);
+}
+
 export class LiveManifestFetcher {
   private deploymentConfigs: Map<string, ProductDeploymentConfig> = new Map();
   private allowedOrigins: Set<string> = new Set([
@@ -37,13 +42,19 @@ export class LiveManifestFetcher {
     const defaults: ProductDeploymentConfig[] = [
       {
         product_id: 'dfl-crm',
-        manifest_url: 'http://127.0.0.1:8000/dfl-manifest.json',
-        allowed_origins: ['http://127.0.0.1:8000', 'http://localhost:8000', 'https://crm.local:8000']
+        manifest_url: process.env.DFL_CRM_MANIFEST_URL || 'http://127.0.0.1:8000/dfl-manifest.json',
+        allowed_origins: parseOrigins(
+          process.env.DFL_CRM_ALLOWED_ORIGINS,
+          ['http://127.0.0.1:8000', 'http://localhost:8000', 'https://crm.local:8000']
+        )
       },
       {
         product_id: 'dfl-commerce',
-        manifest_url: 'http://127.0.0.1:3100/dfl-manifest.json',
-        allowed_origins: ['http://127.0.0.1:3100', 'http://localhost:3100', 'https://commerce.local:3100']
+        manifest_url: process.env.DFL_COMMERCE_MANIFEST_URL || 'http://127.0.0.1:3100/dfl-manifest.json',
+        allowed_origins: parseOrigins(
+          process.env.DFL_COMMERCE_ALLOWED_ORIGINS,
+          ['http://127.0.0.1:3100', 'http://localhost:3100', 'https://commerce.local:3100']
+        )
       }
     ];
 
