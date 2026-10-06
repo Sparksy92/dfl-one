@@ -1,6 +1,8 @@
 name: War Room CI
 
 on:
+  push:
+    branches: [warroom/2026-10-05-integrated-release]
   pull_request:
     branches: [main]
   workflow_dispatch:
