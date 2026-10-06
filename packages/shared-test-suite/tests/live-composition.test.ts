@@ -238,13 +238,20 @@ describe('TIER A — DETERMINISTIC INTEGRATION (18 Gates)', () => {
 
   it('D-06 trusted route resolution succeeds only for approved route_keys', async () => {
     const service = ServerProductRegistryService.getInstance();
-    const crmRoute = service.resolveTrustedRoute('dfl-crm', 'crm.contacts');
+    const crmRoute = service.resolveTrustedRoute('dfl-crm', 'crm.contacts', ['crm.base']);
     assert.equal(crmRoute.ok, true);
     assert.equal(crmRoute.route?.route_key, 'crm.contacts');
 
-    const untrustedRoute = service.resolveTrustedRoute('dfl-crm', 'crm.unapproved_hack');
+    const untrustedRoute = service.resolveTrustedRoute('dfl-crm', 'crm.unapproved_hack', ['crm.base']);
     assert.equal(untrustedRoute.ok, false);
     assert.equal(untrustedRoute.code, 'UNTRUSTED_ROUTE');
+  });
+
+  it('D-07b route resolution fails closed without required entitlement', () => {
+    const service = ServerProductRegistryService.getInstance();
+    const denied = service.resolveTrustedRoute('dfl-crm', 'crm.home', []);
+    assert.equal(denied.ok, false);
+    assert.equal(denied.code, 'DISABLED_PRODUCT');
   });
 
   it('D-07 entitlement filtering dynamically restricts visible navigation', async () => {
@@ -349,7 +356,7 @@ describe('TIER A — DETERMINISTIC INTEGRATION (18 Gates)', () => {
     const service = ServerProductRegistryService.getInstance();
     service.markProductUnhealthy('dfl-commerce', 'unreachable');
 
-    const res = service.resolveTrustedRoute('dfl-commerce', 'commerce.products');
+    const res = service.resolveTrustedRoute('dfl-commerce', 'commerce.products', ['commerce.base']);
     assert.equal(res.ok, false);
     assert.equal(res.code, 'UNHEALTHY_PRODUCT');
   });
@@ -437,7 +444,7 @@ describe('TIER A — SECURITY BOUNDARY GATES (11 Security Gates S-01 to S-11)', 
     service.setProductEnabled('dfl-crm', true);
 
     // Verify resolveTrustedRoute route resolution works when enabled
-    const res = service.resolveTrustedRoute('dfl-crm', 'crm.home');
+    const res = service.resolveTrustedRoute('dfl-crm', 'crm.home', ['crm.base']);
     assert.equal(res.ok, true);
   });
 
