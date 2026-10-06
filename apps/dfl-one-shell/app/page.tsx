@@ -27,13 +27,8 @@ export default function DflOnePage() {
   const fetchProjections = useCallback(async () => {
     try {
       const res = await fetch('/api/composition', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          active_entitlements: entitlements,
-          crm_enabled: crmEnabled,
-          commerce_enabled: commerceEnabled
-        })
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
       });
       const data = await res.json();
       if (data.ok) {
@@ -42,7 +37,7 @@ export default function DflOnePage() {
     } catch (err) {
       console.error('Failed to fetch composition projection from server:', err);
     }
-  }, [entitlements, crmEnabled, commerceEnabled]);
+  }, []);
 
   // 2. Resolve Route Server-Side (Browser DOES NOT resolve trust)
   const resolveRouteServer = useCallback(async (pid: string, rkey: string) => {
@@ -52,9 +47,7 @@ export default function DflOnePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productId: pid,
-          routeKey: rkey,
-          crm_enabled: crmEnabled,
-          commerce_enabled: commerceEnabled
+          routeKey: rkey
         })
       });
       const data: RouteResolutionResponse = await res.json();
@@ -66,7 +59,7 @@ export default function DflOnePage() {
         message: err.message || 'Server route resolution rejected'
       });
     }
-  }, [crmEnabled, commerceEnabled]);
+  }, []);
 
   useEffect(() => {
     fetchProjections();
@@ -322,57 +315,7 @@ export default function DflOnePage() {
 
         {/* Main Viewport Workspace */}
         <main style={{ flex: 1, padding: '24px', backgroundColor: '#020617', overflowY: 'auto' }}>
-          {/* Entitlement Management Panel (Fixture Input sent to Server) */}
-          <div style={{
-            marginBottom: '20px',
-            padding: '12px 16px',
-            backgroundColor: '#1e293b',
-            borderRadius: '8px',
-            border: '1px solid #334155',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontSize: '13px'
-          }}>
-            <div>
-              <span style={{ fontWeight: 'bold' }}>Workspace Entitlements (Server Projection Test Input):</span>
-            </div>
-            <div style={{ display: 'flex', gap: '16px' }}>
-              <label style={{ cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={entitlements.includes('crm.base')}
-                  onChange={() => toggleEntitlement('crm.base')}
-                />
-                {' '}CRM (`crm.base`)
-              </label>
-              <label style={{ cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={entitlements.includes('commerce.base')}
-                  onChange={() => toggleEntitlement('commerce.base')}
-                />
-                {' '}Commerce (`commerce.base`)
-              </label>
-              <span style={{ borderLeft: '1px solid #475569', height: '16px' }} />
-              <label style={{ cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={crmEnabled}
-                  onChange={(e) => setCrmEnabled(e.target.checked)}
-                />
-                {' '}Enable CRM Server Status
-              </label>
-              <label style={{ cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={commerceEnabled}
-                  onChange={(e) => setCommerceEnabled(e.target.checked)}
-                />
-                {' '}Enable Commerce Server Status
-              </label>
-            </div>
-          </div>
+          {/* Entitlements are resolved server-side from the authenticated Portal context. */}
 
           {/* Viewport Content */}
           {selectedRoute === null ? (
