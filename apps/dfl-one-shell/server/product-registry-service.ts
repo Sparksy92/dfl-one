@@ -4,6 +4,12 @@ import { PortalContextEntitlementProvider, ServerFixtureEntitlementProvider, Ent
 import crmManifestJson from '../../../fixtures/crm.manifest.json' with { type: 'json' };
 import commerceManifestJson from '../../../fixtures/commerce.manifest.json' with { type: 'json' };
 
+function envOrigins(name: string, fallback: string[]): string[] {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  return raw.split(',').map((origin) => origin.trim()).filter(Boolean);
+}
+
 export interface ShellProductProjection {
   product_id: string;
   product_name: string;
@@ -47,9 +53,9 @@ export class ServerProductRegistryService {
   private crmRecord: ProductRecord = {
     product_id: 'dfl-crm',
     manifest_version: '1.0.0',
-    expected_product_version: '1.0.0',
-    allowed_origins: ['http://127.0.0.1:8000', 'http://localhost:8000', 'https://crm.local:8000'],
-    health_endpoint: '/api/v1/health',
+    expected_product_version: process.env.DFL_CRM_PRODUCT_VERSION || '1.0.0',
+    allowed_origins: envOrigins('DFL_CRM_ALLOWED_ORIGINS', ['http://127.0.0.1:8000', 'http://localhost:8000', 'https://crm.local:8000']),
+    health_endpoint: process.env.DFL_CRM_HEALTH_ENDPOINT || '/api/v1/health',
     trusted_route_keys: ['crm.home', 'crm.contacts', 'crm.organizations', 'crm.opportunities', 'crm.people', 'crm.activities'],
     entitlement_requirements: ['crm.base'],
     enabled: true
@@ -58,9 +64,9 @@ export class ServerProductRegistryService {
   private commerceRecord: ProductRecord = {
     product_id: 'dfl-commerce',
     manifest_version: '1.0.0',
-    expected_product_version: '0.2.0',
-    allowed_origins: ['http://127.0.0.1:3100', 'http://localhost:3100', 'https://commerce.local:3100'],
-    health_endpoint: '/api/v1/health',
+    expected_product_version: process.env.DFL_COMMERCE_PRODUCT_VERSION || '0.1.0',
+    allowed_origins: envOrigins('DFL_COMMERCE_ALLOWED_ORIGINS', ['http://127.0.0.1:8100', 'http://localhost:8100', 'http://127.0.0.1:3000', 'http://localhost:3000']),
+    health_endpoint: process.env.DFL_COMMERCE_HEALTH_ENDPOINT || '/api/health',
     trusted_route_keys: ['commerce.home', 'commerce.products', 'commerce.orders', 'commerce.customers'],
     entitlement_requirements: ['commerce.base'],
     enabled: true
