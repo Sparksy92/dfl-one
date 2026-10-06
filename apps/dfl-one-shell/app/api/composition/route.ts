@@ -1,16 +1,16 @@
 import { NextResponse } from 'next/server';
 import { ServerProductRegistryService } from '../../../server/product-registry-service';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const serverRegistry = ServerProductRegistryService.getInstance();
-    const entitlementProvider = serverRegistry.getEntitlementProvider();
+    const entitlementProvider = serverRegistry.getProductionEntitlementProvider();
 
     // Mandatory Live Discovery in production composition
     await serverRegistry.discoverLiveProducts();
 
     // Server-owned entitlement resolution
-    const entitlements = await entitlementProvider.getEntitlements({});
+    const entitlements = await entitlementProvider.getEntitlements({ cookieHeader: request.headers.get('cookie') || undefined });
 
     const projections = serverRegistry.getCompositionProjections(entitlements);
 
