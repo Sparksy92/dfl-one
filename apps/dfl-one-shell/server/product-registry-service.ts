@@ -1,6 +1,6 @@
 import { ProductRegistry, ProductRecord, DFLProductManifest } from '@dfl-one/product-registry';
 import { LiveManifestFetcher, LiveManifestResult, ManifestFetchStatus } from './live-manifest-fetcher';
-import { EntitlementProvider, ServerEnvironmentEntitlementProvider } from './entitlement-provider';
+import { EntitlementProvider, PortalContextEntitlementProvider } from './entitlement-provider';
 import crmManifestJson from '../../../fixtures/crm.manifest.json' with { type: 'json' };
 import commerceManifestJson from '../../../fixtures/commerce.manifest.json' with { type: 'json' };
 
@@ -74,7 +74,7 @@ export class ServerProductRegistryService {
   private constructor() {
     this.registry = new ProductRegistry();
     this.liveFetcher = new LiveManifestFetcher();
-    this.entitlementProvider = new ServerEnvironmentEntitlementProvider();
+    this.entitlementProvider = new PortalContextEntitlementProvider();
     this.init();
   }
 
