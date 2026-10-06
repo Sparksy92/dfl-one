@@ -1,0 +1,33 @@
+name: DFL-One War Room Candidate CI
+
+on:
+  push:
+    branches:
+      - warroom/dfl-one-prod-boundary-20261005
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deterministic-build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Build all DFL-One workspaces
+        run: npm run build
+
+      - name: Run deterministic test gate
+        run: npm test
