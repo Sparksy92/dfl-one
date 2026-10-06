@@ -1,6 +1,6 @@
 import { ProductRegistry, ProductRecord, DFLProductManifest } from '@dfl-one/product-registry';
 import { LiveManifestFetcher, LiveManifestResult, ManifestFetchStatus } from './live-manifest-fetcher';
-import { ServerFixtureEntitlementProvider, EntitlementContext } from './entitlement-provider';
+import { PortalContextEntitlementProvider, ServerFixtureEntitlementProvider, EntitlementContext } from './entitlement-provider';
 import crmManifestJson from '../../../fixtures/crm.manifest.json' with { type: 'json' };
 import commerceManifestJson from '../../../fixtures/commerce.manifest.json' with { type: 'json' };
 
@@ -42,6 +42,7 @@ export class ServerProductRegistryService {
   private healthStatuses: Map<string, ManifestFetchStatus> = new Map();
   private liveFetcher: LiveManifestFetcher;
   private entitlementProvider: ServerFixtureEntitlementProvider;
+  private productionEntitlementProvider: PortalContextEntitlementProvider;
 
   private crmRecord: ProductRecord = {
     product_id: 'dfl-crm',
@@ -69,6 +70,7 @@ export class ServerProductRegistryService {
     this.registry = new ProductRegistry();
     this.liveFetcher = new LiveManifestFetcher();
     this.entitlementProvider = new ServerFixtureEntitlementProvider();
+    this.productionEntitlementProvider = new PortalContextEntitlementProvider();
     this.init();
   }
 
@@ -103,6 +105,10 @@ export class ServerProductRegistryService {
 
   public getEntitlementProvider(): ServerFixtureEntitlementProvider {
     return this.entitlementProvider;
+  }
+
+  public getProductionEntitlementProvider(): PortalContextEntitlementProvider {
+    return this.productionEntitlementProvider;
   }
 
   public registerProductRecord(record: ProductRecord) {
