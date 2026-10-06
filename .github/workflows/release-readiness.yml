@@ -23,6 +23,7 @@ jobs:
     env:
       DFL_ONE_SERVER_ENTITLEMENTS: crm.base,commerce.base
       DFL_ONE_ENABLE_TEST_ROUTES: "true"
+      DFL_ONE_REQUIRE_LIVE_RUNTIME: "false"
       NODE_ENV: test
     steps:
       - name: Checkout candidate
