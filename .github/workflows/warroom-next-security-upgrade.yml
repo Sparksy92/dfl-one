@@ -1,0 +1,58 @@
+name: Warroom Next.js Security Upgrade
+
+on:
+  push:
+    branches:
+      - warroom/2026-10-05-integrated-release
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dfl-one-warroom-next-upgrade
+  cancel-in-progress: false
+
+jobs:
+  upgrade-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: warroom/2026-10-05-integrated-release
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Upgrade Next.js on shell workspace
+        run: npm install next@15.5.27 --workspace @dfl-one/shell-app --save-exact --ignore-scripts
+
+      - name: Reproducible install
+        run: npm ci --ignore-scripts
+
+      - name: Test
+        env:
+          NODE_ENV: test
+        run: npm test
+
+      - name: Production build
+        env:
+          NODE_ENV: production
+          DFL_ONE_SERVER_ENTITLEMENTS: crm.base,commerce.base
+        run: npm run build --workspace @dfl-one/shell-app
+
+      - name: Commit verified dependency update
+        run: |
+          if git diff --quiet -- apps/dfl-one-shell/package.json package-lock.json; then
+            echo "No dependency diff to commit"
+            exit 0
+          fi
+          git config user.name "dfl-warroom-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add apps/dfl-one-shell/package.json package-lock.json
+          git commit -m "fix(security): upgrade DFL-One to Next.js 15.5.27 [skip ci]"
+          git push origin HEAD:warroom/2026-10-05-integrated-release
