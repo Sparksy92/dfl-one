@@ -1,0 +1,58 @@
+name: DFL-One Dependency Upgrade Gate
+
+on:
+  push:
+    branches:
+      - warroom/2026-10-05-integrated-release
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      DFL_ONE_SERVER_ENTITLEMENTS: crm.base,commerce.base
+      DFL_ONE_ENABLE_TEST_ROUTES: "true"
+      NODE_ENV: test
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Upgrade framework dependencies and regenerate lockfile
+        run: |
+          npm install next@16.3.8 react@19.2.0 react-dom@19.2.0 @types/react@19 @types/react-dom@19 --workspace=@dfl-one/shell-app --save
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Run workspace tests
+        run: npm test
+
+      - name: Build production shell
+        env:
+          NODE_ENV: production
+          DFL_ONE_ENABLE_TEST_ROUTES: "false"
+        run: npm run build
+
+      - name: Commit verified dependency upgrade
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/dfl-one-shell/package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "No dependency changes to commit."
+            exit 0
+          fi
+          git commit -m "fix(security): upgrade DFL-One framework dependencies"
+          git push origin HEAD:${GITHUB_REF_NAME}
