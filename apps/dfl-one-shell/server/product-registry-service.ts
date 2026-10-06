@@ -30,7 +30,7 @@ export interface ShellRouteProjection {
 
 export interface RouteResolutionResponse {
   ok: boolean;
-  code?: 'UNTRUSTED_ROUTE' | 'DISABLED_PRODUCT' | 'UNKNOWN_PRODUCT' | 'UNSUPPORTED_VERSION' | 'UNHEALTHY_PRODUCT';
+  code?: 'UNTRUSTED_ROUTE' | 'DISABLED_PRODUCT' | 'UNKNOWN_PRODUCT' | 'UNSUPPORTED_VERSION' | 'UNHEALTHY_PRODUCT' | 'ENTITLEMENT_DENIED';
   message?: string;
   route?: ShellRouteProjection;
 }
