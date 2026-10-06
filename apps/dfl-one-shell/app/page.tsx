@@ -8,7 +8,7 @@ import { renderTwentyUISidebarPrimitive } from '@dfl-one/shell-b2-twenty';
 export type CandidateMode = 'NATIVE' | 'REFINE' | 'TWENTY_UI';
 
 export default function DflOnePage() {
-  const [candidateMode, setCandidateMode] = useState<CandidateMode>('NATIVE');
+  const candidateMode: CandidateMode = 'NATIVE';
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false);
@@ -148,52 +148,6 @@ export default function DflOnePage() {
 
         {/* Workspace Context & Candidate Harness Switcher */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {/* Candidate Harness Switcher */}
-          <div style={{ display: 'flex', backgroundColor: '#0f172a', padding: '3px', borderRadius: '6px', border: '1px solid #334155' }}>
-            <button
-              onClick={() => setCandidateMode('NATIVE')}
-              style={{
-                padding: '4px 10px',
-                fontSize: '11px',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                backgroundColor: candidateMode === 'NATIVE' ? '#0284c7' : 'transparent',
-                color: candidateMode === 'NATIVE' ? '#fff' : '#94a3b8'
-              }}
-            >
-              Native
-            </button>
-            <button
-              onClick={() => setCandidateMode('REFINE')}
-              style={{
-                padding: '4px 10px',
-                fontSize: '11px',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                backgroundColor: candidateMode === 'REFINE' ? '#0284c7' : 'transparent',
-                color: candidateMode === 'REFINE' ? '#fff' : '#94a3b8'
-              }}
-            >
-              + Refine
-            </button>
-            <button
-              onClick={() => setCandidateMode('TWENTY_UI')}
-              style={{
-                padding: '4px 10px',
-                fontSize: '11px',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                backgroundColor: candidateMode === 'TWENTY_UI' ? '#0284c7' : 'transparent',
-                color: candidateMode === 'TWENTY_UI' ? '#fff' : '#94a3b8'
-              }}
-            >
-              + twenty-ui
-            </button>
-          </div>
-
           <div style={{ fontSize: '12px', color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span>Tenant: <strong>DFL Productions</strong></span>
             <span style={{ color: '#22c55e', fontSize: '10px' }}>● Healthy</span>
@@ -288,21 +242,6 @@ export default function DflOnePage() {
             <div style={{ fontStyle: 'italic' }}>📋 Agent Ops (Future Slot)</div>
           </div>
 
-          {/* Fail-Closed Route Test Trigger */}
-          <button
-            onClick={() => setSelectedRoute({ productId: 'dfl-crm', routeKey: 'untrusted.secret_hack' })}
-            style={{
-              padding: '6px 10px',
-              fontSize: '11px',
-              backgroundColor: '#dc2626',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            Simulate Unknown Route
-          </button>
         </aside>
 
         {/* Main Viewport Workspace */}
