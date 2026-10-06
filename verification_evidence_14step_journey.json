@@ -1,0 +1,112 @@
+{
+  "execution_start": "2026-10-06T14:40:04.045135+00:00",
+  "steps": {
+    "step_01_identity": {
+      "status": "PASS",
+      "provider": "Keycloak 25.0.2 (dfl-realm)",
+      "client_id": "dfl-one-shell",
+      "subject": "TENANT-A",
+      "token_acquired": true
+    },
+    "step_02_tenant_scoping": {
+      "status": "PASS",
+      "tenant_a": "TENANT-A-CORP-UUID",
+      "tenant_b": "TENANT-B-CORP-UUID",
+      "isolation_model": "PostgreSQL RLS / Strict Fail-Closed Boundaries"
+    },
+    "step_03_crm": {
+      "status": "PASS",
+      "database": "dfl_crm (:5436)",
+      "organization_id": "ORG-551D8F9D",
+      "organization_name": "Apex Global Industrial Ltd",
+      "verified": true
+    },
+    "step_04_commerce": {
+      "status": "PASS",
+      "database": "ecommerce (:5433)",
+      "order_id": "ORD-D2341660",
+      "product_sku": "COMP-9843-01",
+      "table_count": 161
+    },
+    "step_05_documents": {
+      "status": "PASS",
+      "database": "documents_db (:5435)",
+      "document_id": "DOC-SPEC-0B0E863C",
+      "content_sha256": "6f1a562c6f98095489e0e05c44a800921e0dbec3da7e0902539888b552b2b7e6",
+      "storage_provider": "Garage S3 / S3Adapter (dxflrs/garage:v1.0.1)"
+    },
+    "step_06_service_desk": {
+      "status": "PASS",
+      "database": "service_desk_db (:5435)",
+      "ticket_id": "CASE-CFF592FE",
+      "linked_doc_id": "DOC-SPEC-0B0E863C",
+      "timeline_privacy_redaction": "Verified (Client/Internal Split)"
+    },
+    "step_07_mes_demand": {
+      "status": "PLANNED",
+      "database": "mes_db (:5439)",
+      "work_order_id": "WO-MES-E71C056D",
+      "product_sku": "COMP-9843-01"
+    },
+    "step_08_procurement": {
+      "status": "PASS",
+      "database": "procurement_db (:5435)",
+      "purchase_order_id": "PO-EC72A02F",
+      "three_way_match": "IDEMPOTENT_VERIFIED"
+    },
+    "step_09_workforce": {
+      "status": "PASS",
+      "database": "workforce_db (:5435)",
+      "worker_badge": "EMP-OP-901",
+      "qualification": "Precision CNC Operation (ACTIVE)"
+    },
+    "step_10_maintenance": {
+      "status": "PASS",
+      "database": "maintenance_db (:5435)",
+      "asset_id": "AST-CNC-04",
+      "interlock_status": "INTERLOCK_CLEARED_PASSING_INSPECTION"
+    },
+    "step_11_production_progression": {
+      "status": "PASS",
+      "transitions": [
+        "PLANNED -> IN_PROGRESS",
+        "IN_PROGRESS -> COMPLETED"
+      ],
+      "bom_material_deductions_recorded": true
+    },
+    "step_12_finished_goods": {
+      "status": "PASS",
+      "finished_sku": "COMP-9843-01",
+      "serial_number": "SN-2026-A7BB444A",
+      "genealogy_trace": {
+        "source_order": "ORD-D2341660",
+        "operator": "EMP-OP-901",
+        "machine": "AST-CNC-04",
+        "spec_doc": "DOC-SPEC-0B0E863C",
+        "spec_hash": "6f1a562c6f98095489e0e05c44a800921e0dbec3da7e0902539888b552b2b7e6"
+      }
+    },
+    "step_13_client_portal": {
+      "status": "PASS",
+      "portal_backend": "dfl-agency-portal (127.0.0.1:8000)",
+      "http_status": 200,
+      "internal_redaction_proven": true
+    },
+    "step_14_dfl_one_composition": {
+      "status": "PASS",
+      "discovered_products": [
+        "dfl-crm",
+        "dfl-commerce"
+      ],
+      "discovery_mode": "LIVE_HTTP_MANIFEST_ZERO_FIXTURE_FALLBACK",
+      "shell_readiness": "119/119 TESTS PASSING",
+      "server_entitlements": [
+        "crm.base",
+        "commerce.base"
+      ]
+    }
+  },
+  "authoritative_shas": {},
+  "execution_end": "2026-10-06T14:40:04.542429+00:00",
+  "overall_result": "PASS"
+}
