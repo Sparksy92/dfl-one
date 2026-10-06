@@ -26,8 +26,8 @@ describe('Candidate B — DFL Augmented Shell (Refine + twenty-ui)', () => {
   const commerceRecord: ProductRecord = {
     product_id: 'dfl-commerce',
     manifest_version: '1.0.0',
-    expected_product_version: '0.2.0',
-    allowed_origins: ['https://commerce.local:3100'],
+    expected_product_version: '0.1.0',
+    allowed_origins: ['https://commerce.local:3000'],
     health_endpoint: '/api/v1/health',
     trusted_route_keys: ['commerce.home', 'commerce.products', 'commerce.orders', 'commerce.customers'],
     entitlement_requirements: ['commerce.base'],
@@ -133,7 +133,7 @@ describe('Candidate B — DFL Augmented Shell (Refine + twenty-ui)', () => {
 
     const commerceResolved = shell.resolveRoute('dfl-commerce', 'commerce.home');
     assert.equal(commerceResolved.product_id, 'dfl-commerce');
-    assert.equal(commerceResolved.standalone_url, 'https://commerce.local:3100');
+    assert.equal(commerceResolved.standalone_url, 'https://commerce.local:3000');
   });
 
   it('Refine resource mapping and twenty-ui rendering verification', () => {
