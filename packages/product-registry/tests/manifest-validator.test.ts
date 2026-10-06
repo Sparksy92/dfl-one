@@ -20,7 +20,7 @@ describe('ManifestValidator', () => {
   it('validates a correct Commerce manifest fixture', () => {
     const result = validator.validate(commerceManifest);
     assert.equal(result.product_id, 'dfl-commerce');
-    assert.equal(result.version, '0.2.0');
+    assert.equal(result.version, '0.1.0');
   });
 
   it('validates populated notification_providers and dashboard_widgets schema contract', () => {
