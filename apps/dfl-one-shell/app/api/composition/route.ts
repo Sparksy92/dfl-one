@@ -6,18 +6,11 @@ export async function GET() {
     const serverRegistry = ServerProductRegistryService.getInstance();
     const entitlementProvider = serverRegistry.getEntitlementProvider();
 
-    // Mandatory Live Discovery in production composition
     await serverRegistry.discoverLiveProducts();
-
-    // Server-owned entitlement resolution
     const entitlements = await entitlementProvider.getEntitlements({});
-
     const projections = serverRegistry.getCompositionProjections(entitlements);
 
-    return NextResponse.json({
-      ok: true,
-      projections
-    });
+    return NextResponse.json({ ok: true, projections });
   } catch (err: any) {
     return NextResponse.json(
       { ok: false, message: err.message || 'Server composition error' },
