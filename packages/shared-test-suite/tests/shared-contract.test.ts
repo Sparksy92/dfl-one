@@ -26,8 +26,8 @@ const crmRecord: ProductRecord = {
 const commerceRecord: ProductRecord = {
   product_id: 'dfl-commerce',
   manifest_version: '1.0.0',
-  expected_product_version: '0.2.0',
-  allowed_origins: ['https://commerce.local:3100'],
+  expected_product_version: '0.1.0',
+  allowed_origins: ['https://commerce.local:3000'],
   health_endpoint: '/api/v1/health',
   trusted_route_keys: ['commerce.home', 'commerce.products', 'commerce.orders', 'commerce.customers'],
   entitlement_requirements: ['commerce.base'],
@@ -211,7 +211,7 @@ candidates.forEach((cand) => {
       const { adapter } = setup();
       const resolved = adapter.resolveRoute('dfl-commerce', 'commerce.home');
       assert.equal(resolved.product_id, 'dfl-commerce');
-      assert.equal(resolved.standalone_url, 'https://commerce.local:3100');
+      assert.equal(resolved.standalone_url, 'https://commerce.local:3000');
     });
 
     it('F-09 Unknown route fails closed with safe UI error handling', () => {
