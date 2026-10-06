@@ -1,0 +1,47 @@
+name: DFL-One Release Readiness
+
+on:
+  push:
+    branches:
+      - warroom/2026-10-05-integrated-release
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dfl-one-release-readiness-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DFL_ONE_SERVER_ENTITLEMENTS: crm.base,commerce.base
+      DFL_ONE_ENABLE_TEST_ROUTES: "true"
+      NODE_ENV: test
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run workspace tests
+        run: npm test
+
+      - name: Build production shell
+        env:
+          NODE_ENV: production
+          DFL_ONE_ENABLE_TEST_ROUTES: "false"
+        run: npm run build
