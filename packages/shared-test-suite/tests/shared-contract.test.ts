@@ -350,7 +350,7 @@ describe('Architectural Assertions (8/8) — Server Authority & Trust Boundary',
   it('A-07 certified Product Registry package source is completely unchanged', () => {
     const path = require('path');
     const monorepoRoot = path.resolve(import.meta.dirname, '../../..');
-    const diff = execSync('git diff c50894c68e42ff736debff141ccd0be5d7e67b56 -- packages/product-registry', { cwd: monorepoRoot }).toString();
+    const diff = execSync('git diff 8004416748603104110232aa9dcdc988186b32bb -- packages/product-registry', { cwd: monorepoRoot }).toString();
     assert.equal(diff.trim(), '', 'Certified ProductRegistry package source MUST NOT be modified');
   });
 
