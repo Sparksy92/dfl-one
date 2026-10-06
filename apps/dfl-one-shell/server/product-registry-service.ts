@@ -4,6 +4,12 @@ import { EntitlementProvider, ServerEnvironmentEntitlementProvider } from './ent
 import crmManifestJson from '../../../fixtures/crm.manifest.json' with { type: 'json' };
 import commerceManifestJson from '../../../fixtures/commerce.manifest.json' with { type: 'json' };
 
+function parseOrigins(envName: string, defaults: string[]): string[] {
+  const raw = process.env[envName];
+  if (!raw) return defaults;
+  return Array.from(new Set(raw.split(',').map((value) => value.trim()).filter(Boolean)));
+}
+
 export interface ShellProductProjection {
   product_id: string;
   product_name: string;
@@ -47,7 +53,7 @@ export class ServerProductRegistryService {
     product_id: 'dfl-crm',
     manifest_version: '1.0.0',
     expected_product_version: '1.0.0',
-    allowed_origins: ['http://127.0.0.1:8000', 'http://localhost:8000', 'https://crm.local:8000'],
+    allowed_origins: parseOrigins('DFL_CRM_ALLOWED_ORIGINS', ['http://127.0.0.1:8000', 'http://localhost:8000', 'https://crm.local:8000']),
     health_endpoint: '/api/v1/health',
     trusted_route_keys: ['crm.home', 'crm.contacts', 'crm.organizations', 'crm.opportunities', 'crm.people', 'crm.activities'],
     entitlement_requirements: ['crm.base'],
@@ -58,8 +64,8 @@ export class ServerProductRegistryService {
     product_id: 'dfl-commerce',
     manifest_version: '1.0.0',
     expected_product_version: '0.2.0',
-    allowed_origins: ['http://127.0.0.1:3100', 'http://localhost:3100', 'https://commerce.local:3100'],
-    health_endpoint: '/api/v1/health',
+    allowed_origins: parseOrigins('DFL_COMMERCE_ALLOWED_ORIGINS', ['http://127.0.0.1:3100', 'http://localhost:3100', 'https://commerce.local:3100']),
+    health_endpoint: '/api/health',
     trusted_route_keys: ['commerce.home', 'commerce.products', 'commerce.orders', 'commerce.customers'],
     entitlement_requirements: ['commerce.base'],
     enabled: true
