@@ -197,38 +197,6 @@ export class ServerProductRegistryService {
     routeKey: string,
     activeEntitlements: string[]
   ): RouteResolutionResponse {
-
-    let record: ProductRecord;
-    try {
-      record = this.registry.getProductRecord(productId);
-    } catch (err: any) {
-      return {
-        ok: false,
-        code: 'UNKNOWN_PRODUCT',
-        message: `Product '${productId}' is not registered`
-      };
-    }
-
-    const hasEntitlements = (record.entitlement_requirements || []).every((required) =>
-      activeEntitlements.includes(required)
-    );
-    if (!hasEntitlements) {
-      return {
-        ok: false,
-        code: 'UNTRUSTED_ROUTE',
-        message: `Caller is not entitled to product '${productId}'`
-      };
-    }
-
-    const health = this.healthStatuses.get(productId);
-    if (health && health !== 'healthy') {
-      return {
-        ok: false,
-        code: 'UNHEALTHY_PRODUCT',
-        message: `Product '${productId}' is currently ${health} and cannot resolve routes`
-      };
-    }
-
     let record: ProductRecord;
     try {
       record = this.registry.getProductRecord(productId);
@@ -241,7 +209,7 @@ export class ServerProductRegistryService {
     }
 
     const requirements = record.entitlement_requirements || [];
-    const entitled = requirements.every((req) => activeEntitlements.includes(req));
+    const entitled = requirements.every((required) => activeEntitlements.includes(required));
     if (!entitled) {
       return {
         ok: false,
@@ -250,12 +218,21 @@ export class ServerProductRegistryService {
       };
     }
 
+    const health = this.healthStatuses.get(productId);
+    if (health && health !== 'healthy') {
+      return {
+        ok: false,
+        code: 'UNHEALTHY_PRODUCT',
+        message: `Product '${productId}' is currently ${health} and cannot resolve routes`
+      };
+    }
+
     const manifest = this.manifests.get(productId);
     if (!manifest) {
       return {
         ok: false,
         code: 'UNKNOWN_PRODUCT',
-        message: `Product '${productId}' has not been registered in ProductRegistry`
+        message: `Product '${productId}' has not been discovered`
       };
     }
 
@@ -280,7 +257,8 @@ export class ServerProductRegistryService {
           code: 'UNTRUSTED_ROUTE',
           message: `Route key '${routeKey}' is untrusted or unapproved for product '${productId}'`
         };
-      } else if (errName === 'DisabledProductError') {
+      }
+      if (errName === 'DisabledProductError') {
         return {
           ok: false,
           code: 'DISABLED_PRODUCT',
@@ -290,8 +268,9 @@ export class ServerProductRegistryService {
       return {
         ok: false,
         code: 'UNTRUSTED_ROUTE',
-        message: err.message || 'Route resolution rejected by server trust authority'
+        message: err?.message || 'Route resolution rejected by server trust authority'
       };
     }
   }
+
 }
