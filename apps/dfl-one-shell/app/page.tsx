@@ -9,9 +9,6 @@ export type CandidateMode = 'NATIVE' | 'REFINE' | 'TWENTY_UI';
 
 export default function DflOnePage() {
   const [candidateMode, setCandidateMode] = useState<CandidateMode>('NATIVE');
-  const [entitlements, setEntitlements] = useState<string[]>(['crm.base', 'commerce.base']);
-  const [crmEnabled, setCrmEnabled] = useState<boolean>(true);
-  const [commerceEnabled, setCommerceEnabled] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false);
@@ -70,12 +67,6 @@ export default function DflOnePage() {
       resolveRouteServer(selectedRoute.productId, selectedRoute.routeKey);
     }
   }, [selectedRoute, resolveRouteServer]);
-
-  const toggleEntitlement = (ent: string) => {
-    setEntitlements((prev) =>
-      prev.includes(ent) ? prev.filter((e) => e !== ent) : [...prev, ent]
-    );
-  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', backgroundColor: '#0f172a', color: '#f8fafc' }}>
@@ -202,9 +193,8 @@ export default function DflOnePage() {
             </button>
           </div>
 
-          <div style={{ fontSize: '12px', color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span>Tenant: <strong>DFL Productions</strong></span>
-            <span style={{ color: '#22c55e', fontSize: '10px' }}>● Healthy</span>
+          <div style={{ fontSize: '12px', color: '#cbd5e1' }}>
+            Authenticated workspace
           </div>
         </div>
       </header>
@@ -296,21 +286,7 @@ export default function DflOnePage() {
             <div style={{ fontStyle: 'italic' }}>📋 Agent Ops (Future Slot)</div>
           </div>
 
-          {/* Fail-Closed Route Test Trigger */}
-          <button
-            onClick={() => setSelectedRoute({ productId: 'dfl-crm', routeKey: 'untrusted.secret_hack' })}
-            style={{
-              padding: '6px 10px',
-              fontSize: '11px',
-              backgroundColor: '#dc2626',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            Simulate Unknown Route
-          </button>
+
         </aside>
 
         {/* Main Viewport Workspace */}
