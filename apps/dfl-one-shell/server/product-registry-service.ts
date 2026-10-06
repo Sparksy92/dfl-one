@@ -1,6 +1,6 @@
 import { ProductRegistry, ProductRecord, DFLProductManifest } from '@dfl-one/product-registry';
 import { LiveManifestFetcher, LiveManifestResult, ManifestFetchStatus } from './live-manifest-fetcher';
-import { ServerFixtureEntitlementProvider, EntitlementContext } from './entitlement-provider';
+import { EntitlementProvider, ServerEnvironmentEntitlementProvider } from './entitlement-provider';
 import crmManifestJson from '../../../fixtures/crm.manifest.json' with { type: 'json' };
 import commerceManifestJson from '../../../fixtures/commerce.manifest.json' with { type: 'json' };
 
@@ -41,7 +41,7 @@ export class ServerProductRegistryService {
   private manifests: Map<string, DFLProductManifest> = new Map();
   private healthStatuses: Map<string, ManifestFetchStatus> = new Map();
   private liveFetcher: LiveManifestFetcher;
-  private entitlementProvider: ServerFixtureEntitlementProvider;
+  private entitlementProvider: EntitlementProvider;
 
   private crmRecord: ProductRecord = {
     product_id: 'dfl-crm',
@@ -68,7 +68,7 @@ export class ServerProductRegistryService {
   private constructor() {
     this.registry = new ProductRegistry();
     this.liveFetcher = new LiveManifestFetcher();
-    this.entitlementProvider = new ServerFixtureEntitlementProvider();
+    this.entitlementProvider = new ServerEnvironmentEntitlementProvider();
     this.init();
   }
 
@@ -101,7 +101,7 @@ export class ServerProductRegistryService {
     return this.liveFetcher;
   }
 
-  public getEntitlementProvider(): ServerFixtureEntitlementProvider {
+  public getEntitlementProvider(): EntitlementProvider {
     return this.entitlementProvider;
   }
 
@@ -186,13 +186,38 @@ export class ServerProductRegistryService {
     });
   }
 
-  public resolveTrustedRoute(productId: string, routeKey: string): RouteResolutionResponse {
+  public resolveTrustedRoute(
+    productId: string,
+    routeKey: string,
+    activeEntitlements: string[]
+  ): RouteResolutionResponse {
     const health = this.healthStatuses.get(productId);
     if (health && health !== 'healthy') {
       return {
         ok: false,
         code: 'UNHEALTHY_PRODUCT',
         message: `Product '${productId}' is currently ${health} and cannot resolve routes`
+      };
+    }
+
+    let record: ProductRecord;
+    try {
+      record = this.registry.getProductRecord(productId);
+    } catch {
+      return {
+        ok: false,
+        code: 'UNKNOWN_PRODUCT',
+        message: `Product '${productId}' is not registered in ProductRegistry`
+      };
+    }
+
+    const requirements = record.entitlement_requirements || [];
+    const entitled = requirements.every((req) => activeEntitlements.includes(req));
+    if (!entitled) {
+      return {
+        ok: false,
+        code: 'DISABLED_PRODUCT',
+        message: `Product '${productId}' is not entitled for this server context`
       };
     }
 
