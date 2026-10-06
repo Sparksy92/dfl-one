@@ -216,7 +216,7 @@ describe('TIER A — DETERMINISTIC INTEGRATION (18 Gates)', () => {
       manifest_version: '1.0.0',
       expected_product_version: '0.2.0',
       allowed_origins: ['https://commerce.local:3100', `http://127.0.0.1:${MOCK_COMMERCE_PORT}`],
-      health_endpoint: '/api/v1/health',
+      health_endpoint: '/api/health',
       trusted_route_keys: ['commerce.home', 'commerce.products', 'commerce.orders', 'commerce.customers'],
       entitlement_requirements: ['commerce.base'],
       enabled: true
@@ -464,7 +464,9 @@ describe('TIER A — SECURITY BOUNDARY GATES (11 Security Gates S-01 to S-11)', 
 
 });
 
-describe('TIER B — EMPIRICAL LIVE RUNTIME (Actual CRM 8000 + Commerce 3100 Processes)', () => {
+const requireLiveRuntime = process.env.DFL_ONE_REQUIRE_LIVE_RUNTIME === 'true';
+
+describe('TIER B — EMPIRICAL LIVE RUNTIME (Actual CRM 8000 + Commerce 3100 Processes)', { skip: !requireLiveRuntime }, () => {
 
   it('Live CRM process serves valid /dfl-manifest.json on port 8000', async () => {
     const res = await fetch('http://127.0.0.1:8000/dfl-manifest.json');
