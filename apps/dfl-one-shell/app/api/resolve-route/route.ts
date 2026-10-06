@@ -40,6 +40,30 @@ export async function POST(request: Request) {
     }
 
     const serverRegistry = ServerProductRegistryService.getInstance();
+
+    // Resolve only against current live product state.
+    await serverRegistry.discoverLiveProducts();
+
+    // Re-check server-owned tenant entitlement for every route resolution.
+    const entitlementProvider = serverRegistry.getProductionEntitlementProvider();
+    const entitlements = await entitlementProvider.getEntitlements({
+      cookieHeader: request.headers.get('cookie') || undefined
+    });
+    const entitled = serverRegistry
+      .getCompositionProjections(entitlements)
+      .some((projection) => projection.product_id === productId);
+
+    if (!entitled) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: 'ENTITLEMENT_DENIED',
+          message: `Product '${productId}' is not entitled for the authenticated workspace`
+        },
+        { status: 403 }
+      );
+    }
+
     const result = serverRegistry.resolveTrustedRoute(productId, routeKey);
     return NextResponse.json(result);
   } catch (err: any) {
