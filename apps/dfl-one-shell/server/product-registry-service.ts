@@ -197,6 +197,29 @@ export class ServerProductRegistryService {
     routeKey: string,
     activeEntitlements: string[]
   ): RouteResolutionResponse {
+
+    let record: ProductRecord;
+    try {
+      record = this.registry.getProductRecord(productId);
+    } catch (err: any) {
+      return {
+        ok: false,
+        code: 'UNKNOWN_PRODUCT',
+        message: `Product '${productId}' is not registered`
+      };
+    }
+
+    const hasEntitlements = (record.entitlement_requirements || []).every((required) =>
+      activeEntitlements.includes(required)
+    );
+    if (!hasEntitlements) {
+      return {
+        ok: false,
+        code: 'UNTRUSTED_ROUTE',
+        message: `Caller is not entitled to product '${productId}'`
+      };
+    }
+
     const health = this.healthStatuses.get(productId);
     if (health && health !== 'healthy') {
       return {
