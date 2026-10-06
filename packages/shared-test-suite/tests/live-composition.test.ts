@@ -48,13 +48,13 @@ const validCommerceManifest: DFLProductManifest = {
   manifest_version: '1.0.0',
   product_id: 'dfl-commerce',
   product_name: 'DFL Commerce',
-  version: '0.2.0',
+  version: '0.1.0',
   description: 'Production multi-tenant e-commerce platform',
   routes: [
-    { route_key: 'commerce.home', path: '/admin/dashboard', standalone_url: 'https://commerce.local:3100/admin/dashboard' },
-    { route_key: 'commerce.products', path: '/admin/products', standalone_url: 'https://commerce.local:3100/admin/products' },
-    { route_key: 'commerce.orders', path: '/admin/orders', standalone_url: 'https://commerce.local:3100/admin/orders' },
-    { route_key: 'commerce.customers', path: '/admin/customers', standalone_url: 'https://commerce.local:3100/admin/customers' }
+    { route_key: 'commerce.home', path: '/admin/dashboard', standalone_url: 'https://commerce.local:3000/admin/dashboard' },
+    { route_key: 'commerce.products', path: '/admin/products', standalone_url: 'https://commerce.local:3000/admin/products' },
+    { route_key: 'commerce.orders', path: '/admin/orders', standalone_url: 'https://commerce.local:3000/admin/orders' },
+    { route_key: 'commerce.customers', path: '/admin/customers', standalone_url: 'https://commerce.local:3000/admin/customers' }
   ],
   navigation_items: [
     { id: 'commerce.home', label: 'Commerce Overview', icon: 'shopping-bag', target_route: 'commerce.home', order: 1 },
@@ -129,7 +129,7 @@ before(async () => {
       res.end(JSON.stringify(validCommerceManifest));
       return;
     }
-    if (req.url === '/api/v1/health') {
+    if (req.url === '/api/health') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ status: 'ok', product: 'dfl-commerce' }));
       return;
@@ -166,7 +166,7 @@ beforeEach(() => {
   const service = ServerProductRegistryService.getInstance();
   const fetcher = service.getLiveFetcher();
   fetcher.setProductEndpoint('dfl-crm', `http://127.0.0.1:${MOCK_CRM_PORT}/dfl-manifest.json`, [`http://127.0.0.1:${MOCK_CRM_PORT}`, 'https://crm.local:8000']);
-  fetcher.setProductEndpoint('dfl-commerce', `http://127.0.0.1:${MOCK_COMMERCE_PORT}/dfl-manifest.json`, [`http://127.0.0.1:${MOCK_COMMERCE_PORT}`, 'https://commerce.local:3100']);
+  fetcher.setProductEndpoint('dfl-commerce', `http://127.0.0.1:${MOCK_COMMERCE_PORT}/dfl-manifest.json`, [`http://127.0.0.1:${MOCK_COMMERCE_PORT}`, 'https://commerce.local:3000']);
   service.registerLiveManifest('dfl-crm', validCrmManifest, 'healthy');
   service.registerLiveManifest('dfl-commerce', validCommerceManifest, 'healthy');
 });
@@ -182,7 +182,7 @@ describe('TIER A — DETERMINISTIC INTEGRATION (18 Gates)', () => {
   });
 
   it('D-02 Commerce standalone mock functions independently', async () => {
-    const res = await fetch(`http://127.0.0.1:${MOCK_COMMERCE_PORT}/api/v1/health`);
+    const res = await fetch(`http://127.0.0.1:${MOCK_COMMERCE_PORT}/api/health`);
     assert.equal(res.status, 200);
     const data = await res.json() as any;
     assert.equal(data.status, 'ok');
@@ -214,9 +214,9 @@ describe('TIER A — DETERMINISTIC INTEGRATION (18 Gates)', () => {
     registry.registerProductRecord({
       product_id: 'dfl-commerce',
       manifest_version: '1.0.0',
-      expected_product_version: '0.2.0',
-      allowed_origins: ['https://commerce.local:3100', `http://127.0.0.1:${MOCK_COMMERCE_PORT}`],
-      health_endpoint: '/api/v1/health',
+      expected_product_version: '0.1.0',
+      allowed_origins: ['https://commerce.local:3000', `http://127.0.0.1:${MOCK_COMMERCE_PORT}`],
+      health_endpoint: '/api/health',
       trusted_route_keys: ['commerce.home', 'commerce.products', 'commerce.orders', 'commerce.customers'],
       entitlement_requirements: ['commerce.base'],
       enabled: true
@@ -226,7 +226,7 @@ describe('TIER A — DETERMINISTIC INTEGRATION (18 Gates)', () => {
     const manifestJson = await res.json();
     const validated = registry.validateManifest(manifestJson as any);
     assert.equal(validated.product_id, 'dfl-commerce');
-    assert.equal(validated.version, '0.2.0');
+    assert.equal(validated.version, '0.1.0');
   });
 
   it('D-05 both live products discovered by ServerProductRegistryService', async () => {
@@ -449,8 +449,8 @@ describe('TIER A — SECURITY BOUNDARY GATES (11 Security Gates S-01 to S-11)', 
 
   it('S-11 cross-product origin substitution rejected', () => {
     const fetcher = new LiveManifestFetcher();
-    // Attempting to fetch CRM using Commerce's origin (http://127.0.0.1:3100) must FAIL CLOSED
-    const check = fetcher.validateUrlSecurity('http://127.0.0.1:3100/dfl-manifest.json', 'dfl-crm');
+    // Attempting to fetch CRM using Commerce's origin (http://127.0.0.1:8100) must FAIL CLOSED
+    const check = fetcher.validateUrlSecurity('http://127.0.0.1:8100/dfl-manifest.json', 'dfl-crm');
     assert.equal(check.safe, false, 'CRM fetch with Commerce origin MUST be rejected');
     assert.ok(check.reason?.includes('not authorized'));
   });
@@ -482,8 +482,8 @@ describe('TIER B — EMPIRICAL LIVE RUNTIME (Actual CRM 8000 + Commerce 3100 Pro
     assert.equal(validated.product_id, 'dfl-crm');
   });
 
-  it('Live Commerce process serves valid /dfl-manifest.json on port 3100', async () => {
-    const res = await fetch('http://127.0.0.1:3100/dfl-manifest.json');
+  it('Live Commerce API serves valid /dfl-manifest.json on port 8100', async () => {
+    const res = await fetch('http://127.0.0.1:8100/dfl-manifest.json');
     assert.equal(res.status, 200, 'Actual Commerce process on 3100 must return 200 OK');
     const manifest = await res.json() as any;
     assert.equal(manifest.product_id, 'dfl-commerce');
@@ -492,9 +492,9 @@ describe('TIER B — EMPIRICAL LIVE RUNTIME (Actual CRM 8000 + Commerce 3100 Pro
     registry.registerProductRecord({
       product_id: 'dfl-commerce',
       manifest_version: '1.0.0',
-      expected_product_version: '0.2.0',
-      allowed_origins: ['http://127.0.0.1:3100', 'http://localhost:3100', 'https://commerce.local:3100'],
-      health_endpoint: '/api/v1/health',
+      expected_product_version: '0.1.0',
+      allowed_origins: ['http://127.0.0.1:3100', 'http://localhost:3100', 'https://commerce.local:3000'],
+      health_endpoint: '/api/health',
       trusted_route_keys: ['commerce.home', 'commerce.products', 'commerce.orders', 'commerce.customers'],
       entitlement_requirements: ['commerce.base'],
       enabled: true
@@ -511,7 +511,7 @@ describe('TIER B — EMPIRICAL LIVE RUNTIME (Actual CRM 8000 + Commerce 3100 Pro
   });
 
   it('Live Commerce protected API endpoint behavior verified', async () => {
-    const res = await fetch('http://127.0.0.1:3100/api/admin/orders');
+    const res = await fetch('http://127.0.0.1:8100/api/admin/orders');
     // Standalone Commerce returns 401 unauthorized or 500
     assert.ok(res.status === 401 || res.status === 403 || res.status === 500);
   });
@@ -520,7 +520,7 @@ describe('TIER B — EMPIRICAL LIVE RUNTIME (Actual CRM 8000 + Commerce 3100 Pro
     const service = ServerProductRegistryService.getInstance();
     const fetcher = service.getLiveFetcher();
     fetcher.setProductEndpoint('dfl-crm', 'http://127.0.0.1:8000/dfl-manifest.json', ['http://127.0.0.1:8000']);
-    fetcher.setProductEndpoint('dfl-commerce', 'http://127.0.0.1:3100/dfl-manifest.json', ['http://127.0.0.1:3100']);
+    fetcher.setProductEndpoint('dfl-commerce', 'http://127.0.0.1:8100/dfl-manifest.json', ['http://127.0.0.1:8100']);
 
     const results = await service.discoverLiveProducts({ allowFixtureFallback: false });
     assert.equal(results.get('dfl-crm')?.status, 'healthy');
