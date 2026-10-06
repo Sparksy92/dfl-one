@@ -2,13 +2,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { ShellProductProjection, RouteResolutionResponse } from '../server/product-registry-service.js';
-import { RefineAdapter } from '@dfl-one/shell-b1-refine';
-import { renderTwentyUISidebarPrimitive } from '@dfl-one/shell-b2-twenty';
 
-export type CandidateMode = 'NATIVE' | 'REFINE' | 'TWENTY_UI';
 
 export default function DflOnePage() {
-  const candidateMode: CandidateMode = 'NATIVE';
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false);
@@ -146,7 +142,7 @@ export default function DflOnePage() {
           )}
         </div>
 
-        {/* Workspace Context & Candidate Harness Switcher */}
+        {/* Workspace Context */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ fontSize: '12px', color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span>Tenant: <strong>DFL Productions</strong></span>
@@ -167,10 +163,6 @@ export default function DflOnePage() {
           flexDirection: 'column',
           gap: '20px'
         }}>
-          {candidateMode === 'TWENTY_UI' && (
-            <div dangerouslySetInnerHTML={{ __html: renderTwentyUISidebarPrimitive('twenty-ui Primitive', 'MIT') }} />
-          )}
-
           {/* Home Link */}
           <button
             onClick={() => setSelectedRoute(null)}
