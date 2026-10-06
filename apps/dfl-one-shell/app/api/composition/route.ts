@@ -19,9 +19,10 @@ export async function GET(request: Request) {
       projections
     });
   } catch (err: any) {
+    const status = Number.isInteger(err?.statusCode) ? err.statusCode : 500;
     return NextResponse.json(
-      { ok: false, message: err.message || 'Server composition error' },
-      { status: 500 }
+      { ok: false, message: err?.message || 'Server composition error' },
+      { status }
     );
   }
 }
@@ -67,13 +68,13 @@ export async function POST(request: Request) {
     }
 
     const serverRegistry = ServerProductRegistryService.getInstance();
-    const entitlementProvider = serverRegistry.getEntitlementProvider();
+    const entitlementProvider = serverRegistry.getProductionEntitlementProvider();
 
     // Mandatory Live Discovery in production composition
     await serverRegistry.discoverLiveProducts();
 
     // Server-owned entitlement resolution
-    const entitlements = await entitlementProvider.getEntitlements({});
+    const entitlements = await entitlementProvider.getEntitlements({ cookieHeader: request.headers.get('cookie') || undefined });
 
     const projections = serverRegistry.getCompositionProjections(entitlements);
 
@@ -82,9 +83,10 @@ export async function POST(request: Request) {
       projections
     });
   } catch (err: any) {
+    const status = Number.isInteger(err?.statusCode) ? err.statusCode : 500;
     return NextResponse.json(
-      { ok: false, message: err.message || 'Server composition error' },
-      { status: 500 }
+      { ok: false, message: err?.message || 'Server composition error' },
+      { status }
     );
   }
 }
