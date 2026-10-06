@@ -55,7 +55,7 @@ export class ServerProductRegistryService {
     manifest_version: '1.0.0',
     expected_product_version: process.env.DFL_CRM_PRODUCT_VERSION || '1.0.0',
     allowed_origins: envOrigins('DFL_CRM_ALLOWED_ORIGINS', ['http://127.0.0.1:8000', 'http://localhost:8000', 'https://crm.local:8000']),
-    health_endpoint: process.env.DFL_CRM_HEALTH_ENDPOINT || '/api/v1/health',
+    health_endpoint: process.env.DFL_CRM_HEALTH_ENDPOINT || '/api/v1/readiness',
     trusted_route_keys: ['crm.home', 'crm.contacts', 'crm.organizations', 'crm.opportunities', 'crm.people', 'crm.activities'],
     entitlement_requirements: ['crm.base'],
     enabled: true
