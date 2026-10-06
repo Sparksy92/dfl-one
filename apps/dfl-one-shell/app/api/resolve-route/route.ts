@@ -40,7 +40,9 @@ export async function POST(request: Request) {
     }
 
     const serverRegistry = ServerProductRegistryService.getInstance();
-    const result = serverRegistry.resolveTrustedRoute(productId, routeKey);
+    const entitlementProvider = serverRegistry.getEntitlementProvider();
+    const entitlements = await entitlementProvider.getEntitlements({});
+    const result = serverRegistry.resolveTrustedRoute(productId, routeKey, entitlements);
     return NextResponse.json(result);
   } catch (err: any) {
     return NextResponse.json(
