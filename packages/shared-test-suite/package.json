@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "node --import tsx --test tests/**/*.test.ts"
+    "test": "node --import tsx --test tests/**/*.test.ts",
+    "test:live": "DFL_TIER_B_LIVE=1 node --import tsx --test tests/**/*.test.ts"
   },
   "dependencies": {
     "@dfl-one/product-registry": "*",
