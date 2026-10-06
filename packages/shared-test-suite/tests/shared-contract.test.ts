@@ -332,7 +332,7 @@ describe('Architectural Assertions (8/8) — Server Authority & Trust Boundary',
   it('A-05 route trust resolution occurs server-side via ServerProductRegistryService', () => {
     const serverService = ServerProductRegistryService.getInstance();
     serverService.loadFixtures();
-    const res = serverService.resolveTrustedRoute('dfl-crm', 'crm.home');
+    const res = serverService.resolveTrustedRoute('dfl-crm', 'crm.home', ['crm.base']);
     assert.equal(res.ok, true);
     assert.equal(res.route?.product_id, 'dfl-crm');
     assert.equal(res.route?.trusted, true);
