@@ -1,6 +1,8 @@
 export interface EntitlementContext {
   userId?: string;
   tenantId?: string;
+  authorization?: string;
+  cookie?: string;
   scenario?: 'all' | 'crm_only' | 'commerce_only' | 'none';
 }
 
@@ -23,30 +25,66 @@ export class ServerFixtureEntitlementProvider implements EntitlementProvider {
       case 'commerce_only':
         return ['commerce.base'];
       case 'none':
-        return [];
       default:
         return [];
     }
   }
 }
 
+interface PortalContextResponse {
+  organization?: { id?: string };
+  user?: { id?: string };
+  apps?: Record<string, { enabled?: boolean }>;
+}
+
 /**
- * Server-owned production provider.
+ * Production entitlement provider.
  *
- * DFL-One does not accept browser-supplied entitlement claims. Until Keycloak /
- * tenant entitlement integration is completed, production entitlements must be
- * provisioned by the trusted server environment and default to NONE.
+ * Agency Portal is the authoritative owner of durable organization app
+ * entitlements. DFL-One forwards the caller's server-side auth material to
+ * /api/v1/me/context and derives shell visibility from that response.
+ *
+ * Any missing credentials, network failure, malformed response, or non-2xx
+ * response fails closed to zero entitlements.
  */
-export class ServerEnvironmentEntitlementProvider implements EntitlementProvider {
-  public async getEntitlements(_context: EntitlementContext): Promise<string[]> {
-    const raw = process.env.DFL_ONE_SERVER_ENTITLEMENTS || '';
-    return Array.from(
-      new Set(
-        raw
-          .split(',')
-          .map((value) => value.trim())
-          .filter(Boolean)
-      )
-    );
+export class PortalContextEntitlementProvider implements EntitlementProvider {
+  private readonly contextUrl: string;
+
+  constructor(contextUrl = process.env.DFL_ONE_CONTEXT_URL || 'http://127.0.0.1:8000/api/v1/me/context') {
+    this.contextUrl = contextUrl;
+  }
+
+  public async getEntitlements(context: EntitlementContext): Promise<string[]> {
+    if (!context.authorization && !context.cookie) {
+      return [];
+    }
+
+    const headers: Record<string, string> = {
+      Accept: 'application/json'
+    };
+    if (context.authorization) headers.Authorization = context.authorization;
+    if (context.cookie) headers.Cookie = context.cookie;
+
+    try {
+      const response = await fetch(this.contextUrl, {
+        method: 'GET',
+        headers,
+        cache: 'no-store',
+        signal: AbortSignal.timeout(3000)
+      });
+
+      if (!response.ok) return [];
+
+      const payload = await response.json() as PortalContextResponse;
+      const apps = payload.apps || {};
+      const entitlements: string[] = [];
+
+      if (apps.crm?.enabled === true) entitlements.push('crm.base');
+      if (apps.commerce?.enabled === true) entitlements.push('commerce.base');
+
+      return entitlements;
+    } catch {
+      return [];
+    }
   }
 }
