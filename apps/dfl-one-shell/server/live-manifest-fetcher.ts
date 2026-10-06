@@ -33,9 +33,10 @@ export class LiveManifestFetcher {
     'http://127.0.0.1:8000',
     'http://localhost:8000',
     'https://crm.local:8000',
-    'http://127.0.0.1:3100',
-    'http://localhost:3100',
-    'https://commerce.local:3100'
+    'http://127.0.0.1:8100',
+    'http://localhost:8100',
+    'http://127.0.0.1:3000',
+    'http://localhost:3000'
   ]);
 
   constructor(customConfigs?: ProductDeploymentConfig[]) {
@@ -50,10 +51,10 @@ export class LiveManifestFetcher {
       },
       {
         product_id: 'dfl-commerce',
-        manifest_url: process.env.DFL_COMMERCE_MANIFEST_URL || 'http://127.0.0.1:3100/dfl-manifest.json',
+        manifest_url: process.env.DFL_COMMERCE_MANIFEST_URL || 'http://127.0.0.1:8100/dfl-manifest.json',
         allowed_origins: parseOrigins(
           process.env.DFL_COMMERCE_ALLOWED_ORIGINS,
-          ['http://127.0.0.1:3100', 'http://localhost:3100', 'https://commerce.local:3100']
+          ['http://127.0.0.1:8100', 'http://localhost:8100', 'http://127.0.0.1:3000', 'http://localhost:3000']
         )
       }
     ];
